@@ -34,7 +34,7 @@ class Tag(object):
 
         if content:
             assert not attributes
-            self.content = content
+            self.content = list(content)
         if attributes:
             assert not content
             self.attributes = attributes
@@ -46,22 +46,37 @@ class Tag(object):
         if content == tuple():
             self.content = ''
         else:
-            self.content = content
+            self.content = list(content)
         return self
 
     def __str__(self):
         if isinstance(self.content, basestring):
             rendered_content = self.content
-        elif isinstance(self.content, tuple) and self.content:
+        elif isinstance(self.content, list) and self.content:
             rendered_content = reduce(operator.add, map(str, self.content))
         else:
             rendered_content = None
         name = self.__class__.__name__
-        return render_tag(name, rendered_content, self.attributes) 
+        return render_tag(name, rendered_content, self.attributes)
+
+    def fill_blocks(self, **vars):
+        if self.content and isinstance(self.content, list):
+            i = -1
+            for i, c in enumerate(self.content):
+                if isinstance(c, Tag):
+                    c.fill_blocks(**vars)
+                elif isinstance(c, Block):
+                    if c.name in vars:
+                        self.content[i] = vars[c.name]
 
 
 def create_tag(name):
     return type(name, (Tag, object), dict(Tag.__dict__))
+
+
+class Block(object):
+    def __init__(self, name):
+        self.name = name
 
 
 # Create Tags for following names
@@ -112,6 +127,29 @@ class TestPytml(unittest.TestCase):
         self.assertEqual(str(html(lang='tr')('')), '<html lang="tr"></html>')
         self.assertEqual(str(html(lang='tr')('content')), '<html lang="tr">content</html>')
 
+    def test_block_fill_str(self):
+        h = html(
+            head(title('pyhtml is awesome')),
+            body(
+                p('a paragraph'),
+                Block('main')
+            )
+        ).fill_blocks(main='yess')
+        self.assertEqual(str(h), '<html><head><title>pyhtml is awesome'\
+                                 '</title></head><body><p>a paragraph</p>'\
+                                 'yess</body></html>')
+
+    def test_block_fill_tag(self):
+        h = html(
+            head(title('pyhtml is awesome')),
+            body(
+                p('a paragraph'),
+                Block('main')
+            )
+        ).fill_blocks(main=hr)
+        self.assertEqual(str(h), '<html><head><title>pyhtml is awesome'\
+                                 '</title></head><body><p>a paragraph</p>'\
+                                 '<hr/></body></html>')
 
 if __name__ == "__main__":
     unittest.main()
