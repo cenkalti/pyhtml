@@ -84,8 +84,6 @@ this_module = sys.modules[__name__]
 for tag in tags.split():
     __all__.append(tag)
     setattr(this_module, tag, create_tag(tag))
-del tags
-del this_module
 
 
 class TestPytml(unittest.TestCase):
