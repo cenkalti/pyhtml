@@ -60,14 +60,13 @@ class Tag(object):
         return render_tag(name, rendered_content, self.attributes)
 
     def fill_blocks(self, **vars):
-        if self.content and isinstance(self.content, list):
-            i = -1
-            for i, c in enumerate(self.content):
-                if isinstance(c, Tag):
-                    c.fill_blocks(**vars)
-                elif isinstance(c, Block):
-                    if c.name in vars:
-                        self.content[i] = vars[c.name]
+        assert self.content and isinstance(self.content, list)
+        for i, c in enumerate(self.content):
+            if isinstance(c, Tag):
+                c.fill_blocks(**vars)
+            elif isinstance(c, Block):
+                if c.name in vars:
+                    self.content[i] = vars[c.name]
 
 
 def create_tag(name):
