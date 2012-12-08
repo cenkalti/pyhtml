@@ -18,8 +18,15 @@ def render_tag(name, content=None, attributes=None):
         s.write('/>')
     return s.getvalue()
 
+
+class TagMeta(type):
+    def __str__(cls):
+        return render_tag(cls.__name__)
+
         
 class Tag(object):
+
+    __metaclass__ = TagMeta
 
     def __init__(self, *content, **attributes):
         self.content = None
@@ -53,13 +60,8 @@ class Tag(object):
         return render_tag(name, rendered_content, self.attributes) 
 
 
-class TagType(type):
-    def __str__(self):
-        return render_tag(self.__name__)
-
-
 def create_tag(name):
-    return TagType(name, (object, ), dict(Tag.__dict__))
+    return type(name, (Tag, object), dict(Tag.__dict__))
 
 
 # Create Tags for following names
@@ -73,7 +75,7 @@ tags = (
     'del ins ' +  # Annotation
     'ul ol li dd dt dl ' +  # Lists
     'article section nav aside ' +  # HTML5
-    'audio video object embed param ' +  # Media
+    'audio video object_ embed param ' +  # Media
     'fieldset legend button textarea label select option ' +  # Forms
     'table thead tbody tr th td caption ' +  # Tables
     'blockquote cite q abbr acronym address ' +  # Citation, quotes etc
