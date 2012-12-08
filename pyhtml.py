@@ -1,3 +1,4 @@
+import sys
 import unittest
 import operator
 from cStringIO import StringIO
@@ -54,19 +55,37 @@ class Tag(object):
 
 class TagType(type):
     def __str__(self):
-        return render_tag(self.__name__, None, {})
+        return render_tag(self.__name__)
 
 
 def create_tag(name):
     return TagType(name, (object, ), dict(Tag.__dict__))
 
 
-html = create_tag('html')
-head = create_tag('head')
-title = create_tag('title')
-body = create_tag('body')
-p = create_tag('p')
-hr = create_tag('hr')
+# Create Tags for following names
+# 
+__all__ = []
+tags = (
+    'html head body title ' +  # Main elements
+    'div p ' +  # Blocks
+    'h1 h2 h3 h4 h5 h6 ' +  # Headers
+    'u b i s a em strong span font ' +  # Inline markup
+    'del ins ' +  # Annotation
+    'ul ol li dd dt dl ' +  # Lists
+    'article section nav aside ' +  # HTML5
+    'audio video object embed param ' +  # Media
+    'fieldset legend button textarea label select option ' +  # Forms
+    'table thead tbody tr th td caption ' +  # Tables
+    'blockquote cite q abbr acronym address ' +  # Citation, quotes etc
+    'code samp pre var kbd dfn ' +  # Code
+    'meta link br hr input' +  # Empty tags
+'')
+this_module = sys.modules[__name__]
+for tag in tags.split():
+    __all__.append(tag)
+    setattr(this_module, tag, create_tag(tag))
+del tags
+del this_module
 
 
 class TestPytml(unittest.TestCase):
