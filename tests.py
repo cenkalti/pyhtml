@@ -33,7 +33,8 @@ class TestPhtml(unittest.TestCase):
                 p('a paragraph'),
                 Block('main')
             )
-        ).fill_blocks(main='yess')
+        )
+        h['main'] = 'yess'
         self.assertEqual(str(h), '<html><head><title>phtml is awesome'\
                                  '</title></head><body><p>a paragraph</p>'\
                                  'yess</body></html>')
@@ -45,7 +46,8 @@ class TestPhtml(unittest.TestCase):
                 p('a paragraph'),
                 Block('main')
             )
-        ).fill_blocks(main=hr)
+        )
+        h['main'] = hr
         self.assertEqual(str(h), '<html><head><title>phtml is awesome'\
                                  '</title></head><body><p>a paragraph</p>'\
                                  '<hr/></body></html>')
@@ -56,15 +58,15 @@ class TestPhtml(unittest.TestCase):
                 return 'asdf'
         v = V()
         h = html(Block('b'))
-        h = h.fill_blocks(b=v)
+        h['b'] = v
         self.assertEqual(str(h), '<html>asdf</html>')
 
     def test_block_placeholder(self):
         h = html(Block('b')('xxx'))
         self.assertEqual(str(h), '<html>xxx</html>')
-        h = h.fill_blocks(b='yyy')
+        h['b'] = 'yyy'
         self.assertEqual(str(h), '<html>yyy</html>')
-        h = h.fill_blocks(b='zzz')
+        h['b'] = 'zzz'
         self.assertEqual(str(h), '<html>zzz</html>')
 
     def test_find_blocks(self):
@@ -91,7 +93,8 @@ class TestPhtml(unittest.TestCase):
 
     def test_copy(self):
         t = div(Block('a'))
-        t2= t.fill_blocks(a='1')
+        t2 = t.copy()
+        t2['a'] = '1'
         self.assertEqual(str(t), '<div></div>')
         self.assertEqual(str(t2), '<div>1</div>')
 
@@ -115,7 +118,7 @@ class TestPhtml(unittest.TestCase):
                 'c'
             )
         )
-        tag = tag.fill_blocks(b=lambda ctx:'content')
+        tag['b'] = lambda ctx:'content'
         rendered = str(tag)
         self.assertEqual(rendered, '<html><body>acontentc</body></html>')
 
@@ -140,7 +143,7 @@ class TestPhtml(unittest.TestCase):
         tag = div(
             Block('b')
         )
-        tag = tag.fill_blocks(b=greet_user)
+        tag['b'] = greet_user
 
         rendered = tag.render(name='Cenk')
         self.assertEqual(rendered, '<div>Hello Cenk</div>')

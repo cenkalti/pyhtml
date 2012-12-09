@@ -123,6 +123,9 @@ class Tag(object):
             name = self.__class__.__name__
             return render_tag(name, rendered_content, self.attributes)
 
+    def copy(self):
+        return copy.deepcopy(self)
+
     @staticmethod
     def _render_single(x, context=None):
         if context is None:
@@ -143,23 +146,21 @@ class Tag(object):
     def render(self, **context):
         return self.__str__(**context)
 
-    def fill_blocks(self, **vars):
-        """Fill the Blocks in this tag recursively.
+    def __setitem__(self, block_name, *content):
+        """Fill all the Blocks with same block_name
+        in this tag recursively.
         """
-        new_copy = copy.deepcopy(self)
-        blocks = new_copy._find_blocks(vars.keys())
+        blocks = self._find_blocks(block_name)
         for b in blocks:
-            new_content = vars[b.name]
-            b(new_content)
-        return new_copy
+            b(*content)
 
-    def _find_blocks(self, names):
+    def _find_blocks(self, name):
         blocks = []
         for i, c in enumerate(self.content):
-            if isinstance(c, Block) and c.name in names:
+            if isinstance(c, Block) and c.name == name:
                 blocks.append(c)
             elif isinstance(c, Tag):
-                blocks += c._find_blocks(names)
+                blocks += c._find_blocks(name)
         return blocks
 
 
