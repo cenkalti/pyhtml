@@ -23,6 +23,8 @@ def render_tag(name, content=None, attributes=None):
             if k.endswith('_'):
                 k = k.rstrip('_')
             s.write(' %s="%s"' % (k, v))
+    # If we don't want self closing tag,
+    # we must send content as empty string.
     if content or content == '':
         s.write('>')
         s.write(content)
@@ -33,7 +35,11 @@ def render_tag(name, content=None, attributes=None):
 
 
 class TagMeta(type):
+    """Type of the Tag. (type(Tag) == TagMeta)
+    """
     def __str__(cls):
+        """Renders as self closing tag.
+        """
         return render_tag(cls.__name__)
 
 
@@ -46,6 +52,7 @@ class Tag(object):
         self.content = None
         self.attributes = None
 
+        # Only content or attributes may be set at a time.
         if content:
             assert not attributes
             self.content = list(content)
@@ -53,10 +60,14 @@ class Tag(object):
             assert not content
             self.attributes = attributes
 
+        # If __init__ is called with empty arguments,
+        # We must set the self.content to empty strint
+        # so it won't be rendered as self closing tag.
         if not content and not attributes:
             self.content = ''
     
     def __call__(self, *content):
+        """Set content of this tag."""
         if content == tuple():
             self.content = ''
         else:
@@ -67,6 +78,11 @@ class Tag(object):
         return '%r()' % self.__class__.__name__
 
     def __str__(self, content_only=False):
+        """Render this tag with contents.
+
+        If content_only is True, enclosing tags are not visible.
+        This is required for rendering Blocks.
+        """
         if isinstance(self.content, basestring):
             rendered_content = self.content
         elif isinstance(self.content, list) and self.content:
@@ -81,6 +97,8 @@ class Tag(object):
             return render_tag(name, rendered_content, self.attributes)
 
     def fill_blocks(self, **vars):
+        """Fill the Blocks in this tag recursively.
+        """
         blocks = self._find_blocks(vars.keys())
         for b in blocks:
             new_content = vars[b.name]
