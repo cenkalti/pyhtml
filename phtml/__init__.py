@@ -46,11 +46,16 @@ def render_tag(name, content=None, attributes=None):
             # be postfixed with underscore by user.
             if k.endswith('_'):
                 k = k.rstrip('_')
+
+            if isinstance(v, unicode):
+                v = v.encode('utf-8')
             s.write(' %s="%s"' % (k, v))
     # If we don't want self closing tag,
     # we must send content as empty string.
     if content or content == '':
         s.write('>')
+        if isinstance(content, unicode):
+            content = content.encode('utf-8')
         s.write(content)
         s.write('</%s>' % name)
     else:

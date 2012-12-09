@@ -1,3 +1,5 @@
+# -*- coding: utf8 -*-
+
 import unittest
 from phtml import *
 
@@ -147,6 +149,18 @@ class TestPhtml(unittest.TestCase):
 
         rendered = tag.render(name='Cenk')
         self.assertEqual(rendered, '<div>Hello Cenk</div>')
+
+    def test_unicode_content(self):
+        t = title(u'Türkçe')
+        rendered = t.render()
+        expected = u'<title>Türkçe</title>'
+        self.assertEqual(rendered.decode('utf-8'), expected)
+
+    def test_unicode_attr_value(self):
+        t = title(a=u'Türkçe')
+        rendered = t.render()
+        expected = u'<title a="Türkçe"/>'
+        self.assertEqual(rendered.decode('utf-8'), expected)
 
 
 if __name__ == "__main__":
