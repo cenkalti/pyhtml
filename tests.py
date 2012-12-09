@@ -16,6 +16,7 @@ class TestPhtml(unittest.TestCase):
         self.assertEqual(str(html()), '<html></html>')
         self.assertEqual(str(html('')), '<html></html>')
         self.assertEqual(str(html('content')), '<html>content</html>')
+        self.assertEqual(str(html(6)), '<html>6</html>')
         self.assertEqual(str(html(lang='tr')), '<html lang="tr"/>')
 
         self.assertEqual(str(html()()), '<html></html>')
@@ -147,7 +148,6 @@ class TestPhtml(unittest.TestCase):
 
         rendered = tag.render(name='Cenk')
         self.assertEqual(rendered, '<div>Hello Cenk</div>')
-
 
 
 if __name__ == "__main__":
