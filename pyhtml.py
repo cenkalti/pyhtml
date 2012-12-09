@@ -103,6 +103,8 @@ class Tag(object):
         def render(x):
             if isinstance(x, basestring):
                 return escape(str(x))
+            elif callable(x) and not isinstance(x, (Tag, TagMeta)):
+                return escape(str(x()))
             else:
                 return str(x)
 

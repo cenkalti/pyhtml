@@ -107,6 +107,18 @@ class TestPytml(unittest.TestCase):
         rendered = str(tag)
         self.assertEqual(rendered, '<div>&lt;script&gt;</div>')
 
+    def test_callable(self):
+        tag = html(
+            body(
+                'a',
+                Block('b')('placeholder'),
+                'c'
+            )
+        )
+        tag = tag.fill_blocks(b=lambda :'content')
+        rendered = str(tag)
+        self.assertEqual(rendered, '<html><body>acontentc</body></html>')
+
 
 if __name__ == "__main__":
     unittest.main()
