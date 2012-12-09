@@ -81,7 +81,6 @@ class TestPhtml(unittest.TestCase):
                 body(a1, a2, b)
             )
         _a = h._find_blocks('a')
-        print _a
         self.assertEqual(len(_a), 2)
         self.assertIs(_a[0], a1)
         self.assertIs(_a[1], a2)
