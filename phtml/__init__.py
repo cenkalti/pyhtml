@@ -193,7 +193,7 @@ tags = (
     'u b i s a em strong span font ' +  # Inline markup
     'del ins ' +  # Annotation
     'ul ol li dd dt dl ' +  # Lists
-    'article section nav aside ' +  # HTML5
+    'article section nav aside header footer ' +  # HTML5
     'audio video object_ embed param ' +  # Media
     'fieldset legend button textarea label select option ' +  # Forms
     'table thead tbody tr th td caption ' +  # Tables
