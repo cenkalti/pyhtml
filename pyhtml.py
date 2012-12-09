@@ -55,7 +55,7 @@ class Tag(object):
         # Only content or attributes may be set at a time.
         if content:
             assert not attributes
-            self.content = list(content)
+            self.content = content
         if attributes:
             assert not content
             self.attributes = attributes
@@ -71,7 +71,7 @@ class Tag(object):
         if content == tuple():
             self.content = ''
         else:
-            self.content = list(content)
+            self.content = content
         return self
 
     def __repr__(self):
@@ -85,7 +85,7 @@ class Tag(object):
         """
         if isinstance(self.content, basestring):
             rendered_content = self.content
-        elif isinstance(self.content, list) and self.content:
+        elif isinstance(self.content, tuple) and self.content:
             rendered_content = reduce(operator.add, map(str, self.content))
         else:
             rendered_content = None
