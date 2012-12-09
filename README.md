@@ -1,4 +1,4 @@
-pyhtml
+phtml
 ======
 
 Simple HTML generator for Python.
