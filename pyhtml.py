@@ -3,6 +3,21 @@ import copy
 import operator
 from cStringIO import StringIO
 
+try:
+    # Not available before Python 3.2.
+    from html import escape
+except ImportError:
+    def escape(text, quote=True):
+        for k, v in ('&', '&amp;'), ('<', '&lt;'), ('>', '&gt;'):
+            text = text.replace(k, v)
+
+        if quote:
+            for k, v in ('"', '&quot;'), ("'", '&#x27;'):
+                text = text.replace(k, v)
+
+        return text
+
+
 # Filled by export decorator
 __all__ = []
 
@@ -66,7 +81,7 @@ class Tag(object):
         # so it won't be rendered as self closing tag.
         if not content and not attributes:
             self.content = ''
-    
+
     def __call__(self, *content):
         """Set content of this tag."""
         if content == tuple():
@@ -83,11 +98,18 @@ class Tag(object):
 
         If content_only is True, enclosing tags are not visible.
         This is required for rendering Blocks.
+
         """
-        if isinstance(self.content, basestring):
-            rendered_content = self.content
+        def render(x):
+            if isinstance(x, basestring):
+                return escape(str(x))
+            else:
+                return str(x)
+
+        if self.content == '':
+            rendered_content = ''
         elif isinstance(self.content, tuple) and self.content:
-            rendered_content = reduce(operator.add, map(str, self.content))
+            rendered_content = reduce(operator.add, map(render, self.content))
         else:
             rendered_content = None
 

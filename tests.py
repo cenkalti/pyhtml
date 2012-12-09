@@ -95,6 +95,18 @@ class TestPytml(unittest.TestCase):
         self.assertEqual(str(t), '<div></div>')
         self.assertEqual(str(t2), '<div>1</div>')
 
+    def test_escape_tag(self):
+        dangerous = '<script>'
+        tag = div(dangerous)
+        rendered = str(tag)
+        self.assertEqual(rendered, '<div>&lt;script&gt;</div>')
+
+    def test_escape_block(self):
+        dangerous = '<script>'
+        tag = div(Block('b')(dangerous))
+        rendered = str(tag)
+        self.assertEqual(rendered, '<div>&lt;script&gt;</div>')
+
 
 if __name__ == "__main__":
     unittest.main()
