@@ -1,4 +1,5 @@
 import sys
+import copy
 import operator
 from cStringIO import StringIO
 
@@ -99,11 +100,12 @@ class Tag(object):
     def fill_blocks(self, **vars):
         """Fill the Blocks in this tag recursively.
         """
-        blocks = self._find_blocks(vars.keys())
+        new_copy = copy.deepcopy(self)
+        blocks = new_copy._find_blocks(vars.keys())
         for b in blocks:
             new_content = vars[b.name]
             b(new_content)
-        return self
+        return new_copy
 
     def _find_blocks(self, names):
         blocks = []
@@ -122,6 +124,7 @@ def create_tag(name):
 @export
 class Block(Tag):
     def __init__(self, name):
+        """name must be valid Python identifier."""
         self.name = name
         Tag.__init__(self)
     def __repr__(self):

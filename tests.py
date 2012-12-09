@@ -56,15 +56,15 @@ class TestPytml(unittest.TestCase):
                 return 'asdf'
         v = V()
         h = html(Block('b'))
-        h.fill_blocks(b=v)
+        h = h.fill_blocks(b=v)
         self.assertEqual(str(h), '<html>asdf</html>')
 
     def test_block_placeholder(self):
         h = html(Block('b')('xxx'))
         self.assertEqual(str(h), '<html>xxx</html>')
-        h.fill_blocks(b='yyy')
+        h = h.fill_blocks(b='yyy')
         self.assertEqual(str(h), '<html>yyy</html>')
-        h.fill_blocks(b='zzz')
+        h = h.fill_blocks(b='zzz')
         self.assertEqual(str(h), '<html>zzz</html>')
 
     def test_find_blocks(self):
@@ -88,6 +88,12 @@ class TestPytml(unittest.TestCase):
     def test_reserved_keywords(self):
         t = div(class_='container')
         self.assertEqual(str(t), '<div class="container"/>')
+
+    def test_copy(self):
+        t = div(Block('a'))
+        t2= t.fill_blocks(a='1')
+        self.assertEqual(str(t), '<div></div>')
+        self.assertEqual(str(t2), '<div>1</div>')
 
 
 if __name__ == "__main__":
