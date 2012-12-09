@@ -1,8 +1,8 @@
 import unittest
-from pyhtml import *
+from phtml import *
 
 
-class TestPytml(unittest.TestCase):
+class TestPhtml(unittest.TestCase):
 
     def test_render(self):
         self.assertEqual(render_tag('a'), '<a/>')
@@ -28,25 +28,25 @@ class TestPytml(unittest.TestCase):
 
     def test_block_fill_str(self):
         h = html(
-            head(title('pyhtml is awesome')),
+            head(title('phtml is awesome')),
             body(
                 p('a paragraph'),
                 Block('main')
             )
         ).fill_blocks(main='yess')
-        self.assertEqual(str(h), '<html><head><title>pyhtml is awesome'\
+        self.assertEqual(str(h), '<html><head><title>phtml is awesome'\
                                  '</title></head><body><p>a paragraph</p>'\
                                  'yess</body></html>')
 
     def test_block_fill_tag(self):
         h = html(
-            head(title('pyhtml is awesome')),
+            head(title('phtml is awesome')),
             body(
                 p('a paragraph'),
                 Block('main')
             )
         ).fill_blocks(main=hr)
-        self.assertEqual(str(h), '<html><head><title>pyhtml is awesome'\
+        self.assertEqual(str(h), '<html><head><title>phtml is awesome'\
                                  '</title></head><body><p>a paragraph</p>'\
                                  '<hr/></body></html>')
 
