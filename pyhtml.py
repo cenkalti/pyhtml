@@ -2,9 +2,16 @@ import sys
 import operator
 from cStringIO import StringIO
 
-__all__ = ['render_tag', 'Block']
+# Filled by export decorator
+__all__ = []
 
 
+def export(obj):
+    __all__.append(obj.__name__)
+    return obj
+
+
+@export
 def render_tag(name, content=None, attributes=None):
     s = StringIO()
     s.write('<%s' % name)
@@ -24,7 +31,8 @@ class TagMeta(type):
     def __str__(cls):
         return render_tag(cls.__name__)
 
-        
+
+@export
 class Tag(object):
 
     __metaclass__ = TagMeta
@@ -75,6 +83,7 @@ def create_tag(name):
     return type(name, (Tag, object), dict(Tag.__dict__))
 
 
+@export
 class Block(object):
     def __init__(self, name):
         self.name = name
@@ -97,6 +106,7 @@ tags = (
     'meta link br hr input' +  # Empty tags
 '')
 this_module = sys.modules[__name__]
-for tag in tags.split():
-    __all__.append(tag)
-    setattr(this_module, tag, create_tag(tag))
+for tag_name in tags.split():
+    tag = create_tag(tag_name)
+    setattr(this_module, tag_name, tag)
+    export(tag)
