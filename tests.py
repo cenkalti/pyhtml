@@ -115,9 +115,36 @@ class TestPytml(unittest.TestCase):
                 'c'
             )
         )
-        tag = tag.fill_blocks(b=lambda :'content')
+        tag = tag.fill_blocks(b=lambda ctx:'content')
         rendered = str(tag)
         self.assertEqual(rendered, '<html><body>acontentc</body></html>')
+
+    def test_context(self):
+        def greet_user(ctx):
+            name = ctx.get('name', 'user')
+            return 'Hello %s' % name
+        tag = div(
+            greet_user
+        )
+
+        rendered = str(tag)
+        self.assertEqual(rendered, '<div>Hello user</div>')
+
+        rendered = tag.render(name='Cenk')
+        self.assertEqual(rendered, '<div>Hello Cenk</div>')
+
+    def test_context_in_block(self):
+        def greet_user(ctx):
+            name = ctx.get('name', 'user')
+            return 'Hello %s' % name
+        tag = div(
+            Block('b')
+        )
+        tag = tag.fill_blocks(b=greet_user)
+
+        rendered = tag.render(name='Cenk')
+        self.assertEqual(rendered, '<div>Hello Cenk</div>')
+
 
 
 if __name__ == "__main__":

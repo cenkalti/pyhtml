@@ -1,6 +1,7 @@
 import sys
 import copy
 import operator
+from functools import partial
 from cStringIO import StringIO
 
 try:
@@ -25,6 +26,13 @@ __all__ = []
 def export(obj):
     __all__.append(obj.__name__)
     return obj
+
+
+class dotdict(dict):
+    def __getattr__(self, attr):
+        return self.get(attr, None)
+    __setattr__= dict.__setitem__
+    __delattr__= dict.__delitem__
 
 
 @export
@@ -66,7 +74,7 @@ class Tag(object):
 
     def __init__(self, *content, **attributes):
         self.content = None
-        self.attributes = None
+        self.attributes = {}
 
         # Only content or attributes may be set at a time.
         if content:
@@ -93,25 +101,19 @@ class Tag(object):
     def __repr__(self):
         return '%r()' % self.__class__.__name__
 
-    def __str__(self, content_only=False):
-        """Render this tag with contents.
+    def __str__(self, content_only=False, **context):
+        """Render this tag with it's contents.
 
         If content_only is True, enclosing tags are not visible.
         This is required for rendering Blocks.
 
         """
-        def render(x):
-            if isinstance(x, basestring):
-                return escape(str(x))
-            elif callable(x) and not isinstance(x, (Tag, TagMeta)):
-                return escape(str(x()))
-            else:
-                return str(x)
-
         if self.content == '':
             rendered_content = ''
         elif isinstance(self.content, tuple) and self.content:
-            rendered_content = reduce(operator.add, map(render, self.content))
+            f_render = partial(Tag._render_single, context=context)
+            rendered_content = map(f_render, self.content)
+            rendered_content = reduce(operator.add, rendered_content)
         else:
             rendered_content = None
 
@@ -120,6 +122,26 @@ class Tag(object):
         else:
             name = self.__class__.__name__
             return render_tag(name, rendered_content, self.attributes)
+
+    @staticmethod
+    def _render_single(x, context=None):
+        if context is None:
+            context = {}
+
+        if isinstance(x, basestring):
+            return escape(x)
+        elif isinstance(x, Tag):
+            return x.__str__(**context)
+        elif isinstance(x, TagMeta):
+            return str(x)
+        elif callable(x):
+            context = dotdict(context)
+            return escape(str(x(context)))
+        else:
+            return escape(str(x))
+
+    def render(self, **context):
+        return self.__str__(**context)
 
     def fill_blocks(self, **vars):
         """Fill the Blocks in this tag recursively.
@@ -153,8 +175,8 @@ class Block(Tag):
         Tag.__init__(self)
     def __repr__(self):
         return 'Block(%r)' % self.name
-    def __str__(self):
-        return Tag.__str__(self, content_only=True)
+    def __str__(self, **context):
+        return Tag.__str__(self, content_only=True, **context)
 
 
 # Create Tags for following names
