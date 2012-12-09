@@ -16,8 +16,13 @@ def render_tag(name, content=None, attributes=None):
     s = StringIO()
     s.write('<%s' % name)
     if attributes:
-        for attr in attributes.items():
-            s.write(' %s="%s"' % attr)
+        for k, v in attributes.items():
+            # Some attribute names such as "class" conflict
+            # with reserved keywords in Python. These must
+            # be postfixed with underscore by user.
+            if k.endswith('_'):
+                k = k.rstrip('_')
+            s.write(' %s="%s"' % (k, v))
     if content or content == '':
         s.write('>')
         s.write(content)

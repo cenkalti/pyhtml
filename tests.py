@@ -85,5 +85,10 @@ class TestPytml(unittest.TestCase):
         _b = h._find_blocks('b')
         self.assertEqual(_b[0], b)
 
+    def test_reserved_keywords(self):
+        t = div(class_='container')
+        self.assertEqual(str(t), '<div class="container"/>')
+
+
 if __name__ == "__main__":
     unittest.main()
