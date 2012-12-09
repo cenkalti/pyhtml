@@ -50,5 +50,40 @@ class TestPytml(unittest.TestCase):
                                  '</title></head><body><p>a paragraph</p>'\
                                  '<hr/></body></html>')
 
+    def test_block_fill_lazy(self):
+        class V(object):
+            def __str__(self):
+                return 'asdf'
+        v = V()
+        h = html(Block('b'))
+        h.fill_blocks(b=v)
+        self.assertEqual(str(h), '<html>asdf</html>')
+
+    def test_block_placeholder(self):
+        h = html(Block('b')('xxx'))
+        self.assertEqual(str(h), '<html>xxx</html>')
+        h.fill_blocks(b='yyy')
+        self.assertEqual(str(h), '<html>yyy</html>')
+        h.fill_blocks(b='zzz')
+        self.assertEqual(str(h), '<html>zzz</html>')
+
+    def test_find_blocks(self):
+        a1 = Block('a')
+        a2 = Block('a')
+        b = Block('b')
+        h = html(
+                head(
+                    title(Block('title'))
+                ),
+                body(a1, a2, b)
+            )
+        _a = h._find_blocks('a')
+        print _a
+        self.assertEqual(len(_a), 2)
+        self.assertIs(_a[0], a1)
+        self.assertIs(_a[1], a2)
+        _b = h._find_blocks('b')
+        self.assertEqual(_b[0], b)
+
 if __name__ == "__main__":
     unittest.main()

@@ -58,25 +58,38 @@ class Tag(object):
             self.content = list(content)
         return self
 
-    def __str__(self):
+    def __repr__(self):
+        return '%r()' % self.__class__.__name__
+
+    def __str__(self, content_only=False):
         if isinstance(self.content, basestring):
             rendered_content = self.content
         elif isinstance(self.content, list) and self.content:
             rendered_content = reduce(operator.add, map(str, self.content))
         else:
             rendered_content = None
-        name = self.__class__.__name__
-        return render_tag(name, rendered_content, self.attributes)
+
+        if content_only:
+            return rendered_content or ''
+        else:
+            name = self.__class__.__name__
+            return render_tag(name, rendered_content, self.attributes)
 
     def fill_blocks(self, **vars):
-        assert self.content and isinstance(self.content, list)
-        for i, c in enumerate(self.content):
-            if isinstance(c, Tag):
-                c.fill_blocks(**vars)
-            elif isinstance(c, Block):
-                if c.name in vars:
-                    self.content[i] = vars[c.name]
+        blocks = self._find_blocks(vars.keys())
+        for b in blocks:
+            new_content = vars[b.name]
+            b(new_content)
         return self
+
+    def _find_blocks(self, names):
+        blocks = []
+        for i, c in enumerate(self.content):
+            if isinstance(c, Block) and c.name in names:
+                blocks.append(c)
+            elif isinstance(c, Tag):
+                blocks += c._find_blocks(names)
+        return blocks
 
 
 def create_tag(name):
@@ -84,9 +97,14 @@ def create_tag(name):
 
 
 @export
-class Block(object):
+class Block(Tag):
     def __init__(self, name):
         self.name = name
+        Tag.__init__(self)
+    def __repr__(self):
+        return 'Block(%r)' % self.name
+    def __str__(self):
+        return Tag.__str__(self, content_only=True)
 
 
 # Create Tags for following names
