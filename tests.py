@@ -19,19 +19,6 @@ class TestPhtml(unittest.TestCase):
         second = remove_whitespace(second)
         return super(TestPhtml, self).assertEqual(first, second, msg)
 
-    def test_render(self):
-        self.assertEqual(render_tag('a'), '<a/>')
-        self.assertEqual(render_tag('a', '1'), '<a>1</a>')
-        self.assertEqual(render_tag('a', None, {'b': 2}), '<a b="2"/>')
-        self.assertEqual(render_tag('a', '', {'b': 2}), '<a b="2"></a>')
-        self.assertEqual(render_tag('a', 'c', {'b': 2}), '<a b="2">c</a>')
-
-    def test_render_indent(self):
-        self.assertEqualWS(render_tag('a', indent_level=1, indent_size=2), '  <a/>')
-        self.assertEqualWS(render_tag('a', '', indent_level=1, indent_size=2), '  <a></a>')
-        self.assertEqualWS(render_tag('a', 'c', indent_level=1, indent_size=2), '  <a>\n    c\n  </a>')
-        self.assertEqualWS(render_tag('a', 'c\nd', indent_level=1, indent_size=2), '  <a>\n    c\n    d\n  </a>')
-
     def test_tag(self):
         self.assertEqual(str(hr), '<hr/>')
         self.assertEqual(str(html), '<html></html>')
@@ -39,7 +26,7 @@ class TestPhtml(unittest.TestCase):
         self.assertEqual(str(html('')), '<html></html>')
         self.assertEqual(str(html('content')), '<html>content</html>')
         self.assertEqual(str(html(6)), '<html>6</html>')
-        self.assertEqual(str(html(lang='tr')), '<html lang="tr"/>')
+        self.assertEqual(str(html(lang='tr')), '<html lang="tr"></html>')
 
         self.assertEqual(str(html()()), '<html></html>')
         self.assertEqual(str(html()('')), '<html></html>')
@@ -111,7 +98,7 @@ class TestPhtml(unittest.TestCase):
 
     def test_reserved_keywords(self):
         t = div(class_='container')
-        self.assertEqual(str(t), '<div class="container"/>')
+        self.assertEqual(str(t), '<div class="container"></div>')
 
     def test_copy(self):
         t = div(Block('a'))
@@ -179,8 +166,72 @@ class TestPhtml(unittest.TestCase):
     def test_unicode_attr_value(self):
         t = title(a=u'Türkçe')
         rendered = t.render()
-        expected = u'<title a="Türkçe"/>'
+        expected = u'<title a="Türkçe"></title>'
         self.assertEqual(rendered.decode('utf-8'), expected)
+
+    def test_tag_indent(self):
+        f = lambda c: 'text'
+        g = lambda c: 'text with\nnewlines'
+        t = html(
+            head(title('title')),
+            body(
+                f,
+                'some text',
+                p('a paragraph'),
+                div('div with\nsome\nnewlines'),
+                'block start',
+                Block('b')(
+                    f,
+                    'some more text'
+                ),
+                'block end',
+                g,
+                div(
+                    pre('asdf\nzxcv\nqwerty')
+                )
+            )
+        )
+        self.assertEqualWS(str(t), """<html>
+  <head>
+    <title>
+      title
+    </title>
+  </head>
+  <body>
+    text
+    some text
+    <p>
+      a paragraph
+    </p>
+    <div>
+      div with
+      some
+      newlines
+    </div>
+    block start
+    text
+    some more text
+    block end
+    text with
+    newlines
+    <div>
+      <pre>asdf
+zxcv
+qwerty</pre>
+    </div>
+  </body>
+</html>""")
+
+    def test_block(self):
+        f = lambda ctx: 'callable'
+        b = Block('b')(
+            'text',
+            f,
+            div(),
+        )
+        self.assertEqualWS(str(b), """text
+callable
+<div></div>""")
 
 
 if __name__ == "__main__":

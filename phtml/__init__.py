@@ -1,22 +1,6 @@
 import sys
 import copy
-import operator
-from functools import partial
 from cStringIO import StringIO
-
-try:
-    # Not available before Python 3.2.
-    from html import escape
-except ImportError:
-    def escape(text, quote=True):
-        for k, v in ('&', '&amp;'), ('<', '&lt;'), ('>', '&gt;'):
-            text = text.replace(k, v)
-
-        if quote:
-            for k, v in ('"', '&quot;'), ("'", '&#x27;'):
-                text = text.replace(k, v)
-
-        return text
 
 
 # Filled by export decorator
@@ -28,21 +12,139 @@ def export(obj):
     return obj
 
 
+INDENT_SIZE = 2
+
+
+def escape(text, quote=True):
+    for k, v in ('&', '&amp;'), ('<', '&lt;'), ('>', '&gt;'):
+        text = text.replace(k, v)
+
+    if quote:
+        for k, v in ('"', '&quot;'), ("'", '&#x27;'):
+            text = text.replace(k, v)
+
+    return text
+
+
 @export
-def render_tag(name, content=None, attributes=None,
-               indent_level=0, indent_size=2,
-               whitespace_sensitive=False):
-    s = StringIO()
+class Block(object):
+    """List of renderable items."""
 
-    # Indent opening tag
-    s.write(' ' * indent_level * indent_size)
+    whitespace_sensitive = False
 
-    # Open tag
-    s.write('<%s' % name)
+    def __init__(self, name):
+        self.name = name
+        self.children = ()
 
-    # Add attributes
-    if attributes:
-        for k, v in attributes.items():
+    def __repr__(self):
+        return 'Block(%r)' % self.name
+
+    def __call__(self, *children):
+        self.children = children
+        return self
+
+    def __str__(self, out=None, indent=0, **context):
+        if out is None:
+            out = StringIO()
+
+        for i, child in enumerate(self.children):
+            if isinstance(child, Block):
+                child.__str__(out, indent, **context)
+            else:
+                if callable(child) and not isinstance(child, TagMeta):
+                    s = child(context)
+                else:
+                    s = child
+
+                # Convert to string
+                if isinstance(s, unicode):
+                    s = s.encode('utf-8')
+                else:
+                    s = str(s)
+
+                if not isinstance(child, TagMeta):
+                    s = escape(s)
+
+                # Write content
+                if not self.whitespace_sensitive:
+                    lines = s.splitlines(True)
+                    for line in lines:
+                        out.write(' ' * indent)
+                        out.write(line)
+                else:
+                    out.write(s)
+
+            if not self.whitespace_sensitive and i != len(self.children)-1:
+                out.write('\n')
+
+        return out.getvalue()
+
+
+class TagMeta(type):
+    """Type of the Tag. (type(Tag) == TagMeta)
+    """
+    def __str__(cls):
+        """Renders as empty tag."""
+        return '<%s></%s>' % (cls.__name__, cls.__name__)
+
+
+@export
+class Tag(Block):
+
+    __metaclass__ = TagMeta
+
+    def __init__(self, *children, **attributes):
+        # Only children or attributes may be set at a time.
+        assert ((bool(children) ^ bool(attributes))
+                or (not children and not attributes))
+
+        self.children = children
+        self.attributes = attributes
+
+    def __call__(self, *children):
+        """Set children of this tag."""
+        self.children = children
+        return self
+
+    def __repr__(self):
+        return '%r()' % self.__class__.__name__
+
+    def __str__(self, out=None, indent=0, **context):
+        if out is None:
+            out = StringIO()
+
+        # Indent opening tag
+        out.write(' ' * indent)
+
+        # Open tag
+        out.write('<%s' % self.name)
+
+        self._write_attributes(out)
+
+        # Close opening tag
+        out.write('>')
+
+        if self.children:
+            # Newline after opening tag
+            if not self.whitespace_sensitive:
+                out.write('\n')
+
+            # Write content
+            super(Tag, self).__str__(out, indent+INDENT_SIZE, **context)
+
+            if not self.whitespace_sensitive:
+                # Newline after content
+                out.write('\n')
+                # Indent closing tag
+                out.write(' ' * indent)
+
+        # Write closing tag
+        out.write('</%s>' % self.name)
+
+        return out.getvalue()
+
+    def _write_attributes(self, out):
+        for k, v in self.attributes.items():
             # Some attribute names such as "class" conflict
             # with reserved keywords in Python. These must
             # be postfixed with underscore by user.
@@ -52,140 +154,29 @@ def render_tag(name, content=None, attributes=None,
             if isinstance(v, unicode):
                 v = v.encode('utf-8')
 
-            s.write(' %s="%s"' % (k, v))
-
-    # Add content
-    #
-    # If we don't want self closing tag,
-    # we must send content as empty string.
-    if content or content == '':
-        s.write('>')
-
-        if isinstance(content, unicode):
-            content = content.encode('utf-8')
-
-        if whitespace_sensitive or content == '':
-            s.write(content)
-        else:  # Indent each line in content
-            s.write('\n')
-            lines = content.splitlines(True)
-            for line in lines:
-                s.write(' ' * (indent_level+1) * indent_size)
-                s.write(line)
-            s.write('\n')
-
-        # Indent closing tag
-        if not whitespace_sensitive and content:
-            s.write(' ' * indent_level * indent_size)
-
-        # Close tag
-        s.write('</%s>' % name)
-    else:
-        # Close self closing tag
-        s.write('/>')
-
-    return s.getvalue()
-
-
-class TagMeta(type):
-    """Type of the Tag. (type(Tag) == TagMeta)
-    """
-    def __str__(cls):
-        """Renders as empty tag.
-        """
-        return render_tag(cls.__name__, '')
-
-
-@export
-class Tag(object):
-
-    __metaclass__ = TagMeta
-
-    def __init__(self, *content, **attributes):
-        self.content = None
-        self.attributes = {}
-
-        # Only content or attributes may be set at a time.
-        if content:
-            assert not attributes
-            self.content = content
-        if attributes:
-            assert not content
-            self.attributes = attributes
-
-        # If __init__ is called with empty arguments,
-        # We must set the self.content to empty strint
-        # so it won't be rendered as self closing tag.
-        if not content and not attributes:
-            self.content = ''
-
-    def __call__(self, *content):
-        """Set content of this tag."""
-        if content == tuple():
-            self.content = ''
-        else:
-            self.content = content
-        return self
-
-    def __repr__(self):
-        return '%r()' % self.__class__.__name__
-
-    def __str__(self, content_only=False, **context):
-        """Render this tag with it's contents.
-
-        If content_only is True, enclosing tags are not visible.
-        This is required for rendering Blocks.
-
-        """
-        if self.content == '':
-            rendered_content = ''
-        elif isinstance(self.content, tuple) and self.content:
-            f_render = partial(Tag._render_single, context=context)
-            rendered_content = map(f_render, self.content)
-            rendered_content = reduce(operator.add, rendered_content)
-        else:
-            rendered_content = None
-
-        if content_only:
-            return rendered_content or ''
-        else:
-            name = self.__class__.__name__
-            return render_tag(name, rendered_content, self.attributes)
+            out.write(' %s="%s"' % (k, v))
 
     def copy(self):
         return copy.deepcopy(self)
 
-    @staticmethod
-    def _render_single(x, context=None):
-        if context is None:
-            context = {}
-
-        if isinstance(x, basestring):
-            return escape(x)
-        elif isinstance(x, Tag):
-            return x.__str__(**context)
-        elif isinstance(x, TagMeta):
-            return str(x)
-        elif callable(x):
-            context = context
-            return escape(str(x(context)))
-        else:
-            return escape(str(x))
+    @property
+    def name(self):
+        return self.__class__.__name__
 
     def render(self, **context):
         return self.__str__(**context)
 
-    def __setitem__(self, block_name, *content):
+    def __setitem__(self, block_name, *children):
         """Fill all the Blocks with same block_name
         in this tag recursively.
         """
         blocks = self._find_blocks(block_name)
         for b in blocks:
-            b(*content)
+            b(*children)
 
     def _find_blocks(self, name):
         blocks = []
-        for i, c in enumerate(self.content):
+        for i, c in enumerate(self.children):
             if isinstance(c, Block) and c.name == name:
                 blocks.append(c)
             elif isinstance(c, Tag):
@@ -195,9 +186,8 @@ class Tag(object):
 
 class SelfClosingTagMeta(TagMeta):
     def __str__(cls):
-        """Renders as self closing tag.
-        """
-        return render_tag(cls.__name__)
+        """Renders as self closing tag."""
+        return '<%s/>' % cls.__name__
 
 
 class SelfClosingTag(Tag):
@@ -205,27 +195,15 @@ class SelfClosingTag(Tag):
     __metaclass__ = SelfClosingTagMeta
 
     def __init__(self, **attributes):
-        self.content = None
+        self.children = None
         self.attributes = attributes
 
     def __call__(self, *args, **kwargs):
-        raise Exception("Self closing tag can't have content")
+        raise Exception("Self closing tag can't have children")
 
 
 class WhitespaceSensitiveTag(Tag):
-    pass
-
-
-@export
-class Block(Tag):
-    def __init__(self, name):
-        """name must be valid Python identifier."""
-        self.name = name
-        Tag.__init__(self)
-    def __repr__(self):
-        return 'Block(%r)' % self.name
-    def __str__(self, **context):
-        return Tag.__str__(self, content_only=True, **context)
+    whitespace_sensitive = True
 
 
 tags = (
