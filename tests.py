@@ -173,6 +173,10 @@ class TestPhtml(unittest.TestCase):
         t = hr(id=3)
         self.assertEqualWS(str(t), '<hr id="3"/>')
 
+    def test_self_closing_tag_call(self):
+        t = hr()
+        self.assertRaises(Exception, t)
+
     def test_tag_indent(self):
         f = lambda c: 'text'
         g = lambda c: 'text with\nnewlines'
