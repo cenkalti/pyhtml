@@ -14,7 +14,8 @@ class TestPhtml(unittest.TestCase):
         self.assertEqual(render_tag('a', 'c', {'b': 2}), '<a b="2">c</a>')
 
     def test_tag(self):
-        self.assertEqual(str(html), '<html/>')
+        self.assertEqual(str(hr), '<hr/>')
+        self.assertEqual(str(html), '<html></html>')
         self.assertEqual(str(html()), '<html></html>')
         self.assertEqual(str(html('')), '<html></html>')
         self.assertEqual(str(html('content')), '<html>content</html>')

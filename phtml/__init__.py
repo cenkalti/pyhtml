@@ -60,9 +60,9 @@ class TagMeta(type):
     """Type of the Tag. (type(Tag) == TagMeta)
     """
     def __str__(cls):
-        """Renders as self closing tag.
+        """Renders as empty tag.
         """
-        return render_tag(cls.__name__)
+        return render_tag(cls.__name__, '')
 
 
 @export
@@ -162,8 +162,27 @@ class Tag(object):
         return blocks
 
 
-def create_tag(name):
-    return type(name, (Tag, object), dict(Tag.__dict__))
+class SelfClosingTagMeta(TagMeta):
+    def __str__(cls):
+        """Renders as self closing tag.
+        """
+        return render_tag(cls.__name__)
+
+
+class SelfClosingTag(Tag):
+
+    __metaclass__ = SelfClosingTagMeta
+
+    def __init__(self, **attributes):
+        self.content = None
+        self.attributes = attributes
+
+    def __call__(self, *args, **kwargs):
+        raise Exception("Self closing tag can't have content")
+
+
+class WhitespaceSensitiveTag(Tag):
+    pass
 
 
 @export
@@ -178,7 +197,6 @@ class Block(Tag):
         return Tag.__str__(self, content_only=True, **context)
 
 
-# Create Tags for following names
 tags = (
     'html head body title ' +  # Main elements
     'div p ' +  # Blocks
@@ -192,10 +210,20 @@ tags = (
     'table thead tbody tr th td caption ' +  # Tables
     'blockquote cite q abbr acronym address ' +  # Citation, quotes etc
     'code samp pre var kbd dfn ' +  # Code
-    'meta link br hr input' +  # Empty tags
-'')
-this_module = sys.modules[__name__]
-for tag_name in tags.split():
-    tag = create_tag(tag_name)
-    setattr(this_module, tag_name, tag)
-    export(tag)
+'').split()
+
+self_closing_tags = ['meta', 'link', 'br', 'hr', 'input']
+
+def register(tags, cls):
+    """Create tags and add to this module's namespace."""
+    this_module = sys.modules[__name__]
+    for tag_name in tags:
+        tag = create_tag(tag_name, cls)
+        setattr(this_module, tag_name, tag)
+        export(tag)
+
+def create_tag(name, cls):
+    return type(name, (cls, object), dict(cls.__dict__))
+
+register(tags, Tag)
+register(self_closing_tags, SelfClosingTag)
