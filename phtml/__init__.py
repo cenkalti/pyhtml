@@ -200,6 +200,23 @@ class SelfClosingTag(Tag):
     def __call__(self, *args, **kwargs):
         raise Exception("Self closing tag can't have children")
 
+    def __str__(self, out=None, indent=0, **context):
+        if out is None:
+            out = StringIO()
+
+        # Indent
+        out.write(' ' * indent)
+
+        # Open tag
+        out.write('<%s' % self.name)
+
+        self._write_attributes(out)
+
+        # Close tag
+        out.write('/>')
+
+        return out.getvalue()
+
 
 class WhitespaceSensitiveTag(Tag):
     whitespace_sensitive = True
