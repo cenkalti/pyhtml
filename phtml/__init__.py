@@ -28,13 +28,6 @@ def export(obj):
     return obj
 
 
-class dotdict(dict):
-    def __getattr__(self, attr):
-        return self.get(attr, None)
-    __setattr__= dict.__setitem__
-    __delattr__= dict.__delitem__
-
-
 @export
 def render_tag(name, content=None, attributes=None):
     s = StringIO()
@@ -143,7 +136,7 @@ class Tag(object):
         elif isinstance(x, TagMeta):
             return str(x)
         elif callable(x):
-            context = dotdict(context)
+            context = context
             return escape(str(x(context)))
         else:
             return escape(str(x))
