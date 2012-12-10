@@ -209,10 +209,11 @@ tags = (
     'fieldset legend button textarea label select option ' +  # Forms
     'table thead tbody tr th td caption ' +  # Tables
     'blockquote cite q abbr acronym address ' +  # Citation, quotes etc
-    'code samp pre var kbd dfn ' +  # Code
 '').split()
 
-self_closing_tags = ['meta', 'link', 'br', 'hr', 'input']
+self_closing_tags = 'meta link br hr input'.split()
+
+whitespace_sensitive_tags = 'code samp pre var kbd dfn'.split()
 
 def register(tags, cls):
     """Create tags and add to this module's namespace."""
@@ -227,3 +228,4 @@ def create_tag(name, cls):
 
 register(tags, Tag)
 register(self_closing_tags, SelfClosingTag)
+register(whitespace_sensitive_tags, WhitespaceSensitiveTag)
