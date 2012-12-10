@@ -79,6 +79,29 @@ class Block(object):
 
         return out.getvalue()
 
+    def copy(self):
+        return copy.deepcopy(self)
+
+    def render(self, **context):
+        return self.__str__(**context)
+
+    def __setitem__(self, block_name, *children):
+        """Fill all the Blocks with same block_name
+        in this tag recursively.
+        """
+        blocks = self._find_blocks(block_name)
+        for b in blocks:
+            b(*children)
+
+    def _find_blocks(self, name):
+        blocks = []
+        for i, c in enumerate(self.children):
+            if isinstance(c, Block) and c.name == name:
+                blocks.append(c)
+            elif isinstance(c, Tag):
+                blocks += c._find_blocks(name)
+        return blocks
+
 
 class TagMeta(type):
     """Type of the Tag. (type(Tag) == TagMeta)
@@ -107,7 +130,7 @@ class Tag(Block):
         return self
 
     def __repr__(self):
-        return '%r()' % self.__class__.__name__
+        return '%s()' % self.name
 
     def __str__(self, out=None, indent=0, **context):
         if out is None:
@@ -156,32 +179,9 @@ class Tag(Block):
 
             out.write(' %s="%s"' % (k, v))
 
-    def copy(self):
-        return copy.deepcopy(self)
-
     @property
     def name(self):
         return self.__class__.__name__
-
-    def render(self, **context):
-        return self.__str__(**context)
-
-    def __setitem__(self, block_name, *children):
-        """Fill all the Blocks with same block_name
-        in this tag recursively.
-        """
-        blocks = self._find_blocks(block_name)
-        for b in blocks:
-            b(*children)
-
-    def _find_blocks(self, name):
-        blocks = []
-        for i, c in enumerate(self.children):
-            if isinstance(c, Block) and c.name == name:
-                blocks.append(c)
-            elif isinstance(c, Tag):
-                blocks += c._find_blocks(name)
-        return blocks
 
 
 class SelfClosingTagMeta(TagMeta):
@@ -195,8 +195,7 @@ class SelfClosingTag(Tag):
     __metaclass__ = SelfClosingTagMeta
 
     def __init__(self, **attributes):
-        self.children = None
-        self.attributes = attributes
+        super(SelfClosingTag, self).__init__(**attributes)
 
     def __call__(self, *args, **kwargs):
         raise Exception("Self closing tag can't have children")
