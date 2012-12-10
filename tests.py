@@ -6,12 +6,31 @@ from phtml import *
 
 class TestPhtml(unittest.TestCase):
 
+    assertEqualWS = unittest.TestCase.assertEqual
+
+    def assertEqual(self, first, second, msg=None):
+        """Overriden for ignoring whitespace."""
+        def remove_whitespace(s):
+            if isinstance(s, basestring):
+                return s.replace(' ', '').replace('\n', '')
+            else:
+                return s
+        first = remove_whitespace(first)
+        second = remove_whitespace(second)
+        return super(TestPhtml, self).assertEqual(first, second, msg)
+
     def test_render(self):
         self.assertEqual(render_tag('a'), '<a/>')
         self.assertEqual(render_tag('a', '1'), '<a>1</a>')
         self.assertEqual(render_tag('a', None, {'b': 2}), '<a b="2"/>')
         self.assertEqual(render_tag('a', '', {'b': 2}), '<a b="2"></a>')
         self.assertEqual(render_tag('a', 'c', {'b': 2}), '<a b="2">c</a>')
+
+    def test_render_indent(self):
+        self.assertEqualWS(render_tag('a', indent_level=1, indent_size=2), '  <a/>')
+        self.assertEqualWS(render_tag('a', '', indent_level=1, indent_size=2), '  <a></a>')
+        self.assertEqualWS(render_tag('a', 'c', indent_level=1, indent_size=2), '  <a>\n    c\n  </a>')
+        self.assertEqualWS(render_tag('a', 'c\nd', indent_level=1, indent_size=2), '  <a>\n    c\n    d\n  </a>')
 
     def test_tag(self):
         self.assertEqual(str(hr), '<hr/>')

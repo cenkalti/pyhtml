@@ -29,9 +29,18 @@ def export(obj):
 
 
 @export
-def render_tag(name, content=None, attributes=None):
+def render_tag(name, content=None, attributes=None,
+               indent_level=0, indent_size=2,
+               whitespace_sensitive=False):
     s = StringIO()
+
+    # Indent opening tag
+    s.write(' ' * indent_level * indent_size)
+
+    # Open tag
     s.write('<%s' % name)
+
+    # Add attributes
     if attributes:
         for k, v in attributes.items():
             # Some attribute names such as "class" conflict
@@ -42,17 +51,39 @@ def render_tag(name, content=None, attributes=None):
 
             if isinstance(v, unicode):
                 v = v.encode('utf-8')
+
             s.write(' %s="%s"' % (k, v))
+
+    # Add content
+    #
     # If we don't want self closing tag,
     # we must send content as empty string.
     if content or content == '':
         s.write('>')
+
         if isinstance(content, unicode):
             content = content.encode('utf-8')
-        s.write(content)
+
+        if whitespace_sensitive or content == '':
+            s.write(content)
+        else:  # Indent each line in content
+            s.write('\n')
+            lines = content.splitlines(True)
+            for line in lines:
+                s.write(' ' * (indent_level+1) * indent_size)
+                s.write(line)
+            s.write('\n')
+
+        # Indent closing tag
+        if not whitespace_sensitive and content:
+            s.write(' ' * indent_level * indent_size)
+
+        # Close tag
         s.write('</%s>' % name)
     else:
+        # Close self closing tag
         s.write('/>')
+
     return s.getvalue()
 
 
