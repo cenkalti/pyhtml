@@ -19,6 +19,12 @@ class TestPhtml(unittest.TestCase):
         second = remove_whitespace(second)
         return super(TestPhtml, self).assertEqual(first, second, msg)
 
+    def test_repr(self):
+        t = html()
+        b = Block('x')
+        self.assertEqualWS(repr(t), 'html()')
+        self.assertEqualWS(repr(b), "Block('x')")
+
     def test_tag(self):
         self.assertEqual(str(hr), '<hr/>')
         self.assertEqual(str(html), '<html></html>')
