@@ -116,6 +116,8 @@ class Tag(Block):
 
     __metaclass__ = TagMeta
 
+    doctype = None
+
     def __init__(self, *children, **attributes):
         # Only children or attributes may be set at a time.
         assert ((bool(children) ^ bool(attributes))
@@ -135,6 +137,12 @@ class Tag(Block):
     def __str__(self, out=None, indent=0, **context):
         if out is None:
             out = StringIO()
+
+        # Write doctype
+        if self.doctype:
+            out.write(' ' * indent)
+            out.write(self.doctype)
+            out.write('\n')
 
         # Indent opening tag
         out.write(' ' * indent)
@@ -223,7 +231,7 @@ class WhitespaceSensitiveTag(Tag):
 
 
 tags = (
-    'html head body title ' +  # Main elements
+    'head body title ' +  # Main elements
     'div p ' +  # Blocks
     'h1 h2 h3 h4 h5 h6 ' +  # Headers
     'u b i s a em strong span font ' +  # Inline markup
@@ -254,3 +262,8 @@ def create_tag(name, cls):
 register(tags, Tag)
 register(self_closing_tags, SelfClosingTag)
 register(whitespace_sensitive_tags, WhitespaceSensitiveTag)
+
+
+@export 
+class html(Tag):
+    doctype = '<!DOCTYPE html>'

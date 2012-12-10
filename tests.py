@@ -27,23 +27,23 @@ class TestPhtml(unittest.TestCase):
 
     def test_tag(self):
         self.assertEqual(str(hr), '<hr/>')
-        self.assertEqual(str(html), '<html></html>')
-        self.assertEqual(str(html()), '<html></html>')
-        self.assertEqual(str(html('')), '<html></html>')
-        self.assertEqual(str(html('content')), '<html>content</html>')
-        self.assertEqual(str(html(6)), '<html>6</html>')
-        self.assertEqual(str(html(lang='tr')), '<html lang="tr"></html>')
+        self.assertEqual(str(div), '<div></div>')
+        self.assertEqual(str(div()), '<div></div>')
+        self.assertEqual(str(div('')), '<div></div>')
+        self.assertEqual(str(div('content')), '<div>content</div>')
+        self.assertEqual(str(div(6)), '<div>6</div>')
+        self.assertEqual(str(div(lang='tr')), '<div lang="tr"></div>')
 
-        self.assertEqual(str(html()()), '<html></html>')
-        self.assertEqual(str(html()('')), '<html></html>')
-        self.assertEqual(str(html()('content')), '<html>content</html>')
+        self.assertEqual(str(div()()), '<div></div>')
+        self.assertEqual(str(div()('')), '<div></div>')
+        self.assertEqual(str(div()('content')), '<div>content</div>')
 
-        self.assertEqual(str(html(lang='tr')()), '<html lang="tr"></html>')
-        self.assertEqual(str(html(lang='tr')('')), '<html lang="tr"></html>')
-        self.assertEqual(str(html(lang='tr')('content')), '<html lang="tr">content</html>')
+        self.assertEqual(str(div(lang='tr')()), '<div lang="tr"></div>')
+        self.assertEqual(str(div(lang='tr')('')), '<div lang="tr"></div>')
+        self.assertEqual(str(div(lang='tr')('content')), '<div lang="tr">content</div>')
 
     def test_block_fill_str(self):
-        h = html(
+        h = div(
             head(title('phtml is awesome')),
             body(
                 p('a paragraph'),
@@ -51,12 +51,12 @@ class TestPhtml(unittest.TestCase):
             )
         )
         h['main'] = 'yess'
-        self.assertEqual(str(h), '<html><head><title>phtml is awesome'\
+        self.assertEqual(str(h), '<div><head><title>phtml is awesome'\
                                  '</title></head><body><p>a paragraph</p>'\
-                                 'yess</body></html>')
+                                 'yess</body></div>')
 
     def test_block_fill_tag(self):
-        h = html(
+        h = div(
             head(title('phtml is awesome')),
             body(
                 p('a paragraph'),
@@ -64,26 +64,26 @@ class TestPhtml(unittest.TestCase):
             )
         )
         h['main'] = hr
-        self.assertEqual(str(h), '<html><head><title>phtml is awesome'\
+        self.assertEqual(str(h), '<div><head><title>phtml is awesome'\
                                  '</title></head><body><p>a paragraph</p>'\
-                                 '<hr/></body></html>')
+                                 '<hr/></body></div>')
 
     def test_block_fill_lazy(self):
         class V(object):
             def __str__(self):
                 return 'asdf'
         v = V()
-        h = html(Block('b'))
+        h = div(Block('b'))
         h['b'] = v
-        self.assertEqual(str(h), '<html>asdf</html>')
+        self.assertEqual(str(h), '<div>asdf</div>')
 
     def test_block_placeholder(self):
-        h = html(Block('b')('xxx'))
-        self.assertEqual(str(h), '<html>xxx</html>')
+        h = div(Block('b')('xxx'))
+        self.assertEqual(str(h), '<div>xxx</div>')
         h['b'] = 'yyy'
-        self.assertEqual(str(h), '<html>yyy</html>')
+        self.assertEqual(str(h), '<div>yyy</div>')
         h['b'] = 'zzz'
-        self.assertEqual(str(h), '<html>zzz</html>')
+        self.assertEqual(str(h), '<div>zzz</div>')
 
     def test_find_blocks(self):
         a1 = Block('a')
@@ -126,8 +126,8 @@ class TestPhtml(unittest.TestCase):
         self.assertEqual(rendered, '<div>&lt;script&gt;</div>')
 
     def test_callable(self):
-        tag = html(
-            body(
+        tag = div(
+            p(
                 'a',
                 Block('b')('placeholder'),
                 'c'
@@ -135,7 +135,7 @@ class TestPhtml(unittest.TestCase):
         )
         tag['b'] = lambda ctx:'content'
         rendered = str(tag)
-        self.assertEqual(rendered, '<html><body>acontentc</body></html>')
+        self.assertEqual(rendered, '<div><p>acontentc</p></div>')
 
     def test_context(self):
         def greet_user(ctx):
@@ -205,7 +205,8 @@ class TestPhtml(unittest.TestCase):
                 )
             )
         )
-        self.assertEqualWS(str(t), """<html>
+        self.assertEqualWS(str(t), """<!DOCTYPE html>
+<html>
   <head>
     <title>
       title
