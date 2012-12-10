@@ -31,6 +31,7 @@ class Block(object):
     """List of renderable items."""
 
     whitespace_sensitive = False
+    safe = False
 
     def __init__(self, name):
         self.name = name
@@ -63,7 +64,8 @@ class Block(object):
                     s = str(s)
 
                 if not isinstance(child, TagMeta):
-                    s = escape(s)
+                    if not self.safe:
+                        s = escape(s)
 
                 # Write content
                 if not self.whitespace_sensitive:

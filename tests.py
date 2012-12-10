@@ -125,6 +125,11 @@ class TestPhtml(unittest.TestCase):
         rendered = str(tag)
         self.assertEqual(rendered, '<div>&lt;script&gt;</div>')
 
+    def test_block_safe(self):
+        b = div('<script>')
+        b.safe = True
+        self.assertIn('<script>', str(b))
+
     def test_callable(self):
         tag = div(
             p(
