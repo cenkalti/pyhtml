@@ -48,6 +48,8 @@ class Block(object):
         if out is None:
             out = StringIO()
 
+        is_last_item = lambda: i == len(self.children) - 1
+
         for i, child in enumerate(self.children):
             if isinstance(child, Block):
                 child.__str__(out, indent, **context)
@@ -76,7 +78,7 @@ class Block(object):
                 else:
                     out.write(s)
 
-            if not self.whitespace_sensitive and i != len(self.children)-1:
+            if not self.whitespace_sensitive and not is_last_item():
                 out.write('\n')
 
         return out.getvalue()
@@ -163,7 +165,7 @@ class Tag(Block):
                 out.write('\n')
 
             # Write content
-            super(Tag, self).__str__(out, indent+INDENT_SIZE, **context)
+            super(Tag, self).__str__(out, indent + INDENT_SIZE, **context)
 
             if not self.whitespace_sensitive:
                 # Newline after content
@@ -244,11 +246,12 @@ tags = (
     'fieldset legend button textarea label select option ' +  # Forms
     'table thead tbody tr th td caption ' +  # Tables
     'blockquote cite q abbr acronym address ' +  # Citation, quotes etc
-'').split()
+    '').split()
 
 self_closing_tags = 'meta link br hr input'.split()
 
 whitespace_sensitive_tags = 'code samp pre var kbd dfn'.split()
+
 
 def register(tags, cls):
     """Create tags and add to this module's namespace."""
@@ -258,6 +261,7 @@ def register(tags, cls):
         setattr(this_module, tag_name, tag)
         export(tag)
 
+
 def create_tag(name, cls):
     return type(name, (cls, object), dict(cls.__dict__))
 
@@ -266,6 +270,6 @@ register(self_closing_tags, SelfClosingTag)
 register(whitespace_sensitive_tags, WhitespaceSensitiveTag)
 
 
-@export 
+@export
 class html(Tag):
     doctype = '<!DOCTYPE html>'

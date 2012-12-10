@@ -40,7 +40,8 @@ class TestPhtml(unittest.TestCase):
 
         self.assertEqual(str(div(lang='tr')()), '<div lang="tr"></div>')
         self.assertEqual(str(div(lang='tr')('')), '<div lang="tr"></div>')
-        self.assertEqual(str(div(lang='tr')('content')), '<div lang="tr">content</div>')
+        self.assertEqual(str(div(lang='tr')('content')), '<div lang="tr">'
+                                                         'content</div>')
 
     def test_block_fill_str(self):
         h = div(
@@ -51,8 +52,8 @@ class TestPhtml(unittest.TestCase):
             )
         )
         h['main'] = 'yess'
-        self.assertEqual(str(h), '<div><head><title>phtml is awesome'\
-                                 '</title></head><body><p>a paragraph</p>'\
+        self.assertEqual(str(h), '<div><head><title>phtml is awesome'
+                                 '</title></head><body><p>a paragraph</p>'
                                  'yess</body></div>')
 
     def test_block_fill_tag(self):
@@ -64,8 +65,8 @@ class TestPhtml(unittest.TestCase):
             )
         )
         h['main'] = hr
-        self.assertEqual(str(h), '<div><head><title>phtml is awesome'\
-                                 '</title></head><body><p>a paragraph</p>'\
+        self.assertEqual(str(h), '<div><head><title>phtml is awesome'
+                                 '</title></head><body><p>a paragraph</p>'
                                  '<hr/></body></div>')
 
     def test_block_fill_lazy(self):
@@ -90,11 +91,11 @@ class TestPhtml(unittest.TestCase):
         a2 = Block('a')
         b = Block('b')
         h = html(
-                head(
-                    title(Block('title'))
-                ),
-                body(a1, a2, b)
-            )
+            head(
+                title(Block('title'))
+            ),
+            body(a1, a2, b)
+        )
         _a = h._find_blocks('a')
         self.assertEqual(len(_a), 2)
         self.assertIs(_a[0], a1)
@@ -138,7 +139,7 @@ class TestPhtml(unittest.TestCase):
                 'c'
             )
         )
-        tag['b'] = lambda ctx:'content'
+        tag['b'] = lambda ctx: 'content'
         rendered = str(tag)
         self.assertEqual(rendered, '<div><p>acontentc</p></div>')
 
