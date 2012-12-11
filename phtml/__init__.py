@@ -93,6 +93,7 @@ Full example:
             'Content here'                              \
         ),                                              \
         footer(                                         \
+            hr,                                         \
             'Copyright 2012'                            \
         )                                               \
     )                                                   \
@@ -113,6 +114,7 @@ Full example:
       Content here
     </div>
     <footer>
+      <hr/>
       Copyright 2012
     </footer>
   </body>
