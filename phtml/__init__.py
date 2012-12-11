@@ -1,5 +1,5 @@
 import sys
-import copy
+from copy import deepcopy
 from cStringIO import StringIO
 
 
@@ -84,7 +84,7 @@ class Block(object):
         return out.getvalue()
 
     def copy(self):
-        return copy.deepcopy(self)
+        return deepcopy(self)
 
     def render(self, **context):
         return self.__str__(**context)

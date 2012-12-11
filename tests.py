@@ -21,9 +21,9 @@ class TestPhtml(unittest.TestCase):
 
     def test_repr(self):
         t = html()
-        b = Block('x')
+        x = Block('x')
         self.assertEqualWS(repr(t), 'html()')
-        self.assertEqualWS(repr(b), "Block('x')")
+        self.assertEqualWS(repr(x), "Block('x')")
 
     def test_tag(self):
         self.assertEqual(str(hr), '<hr/>')
@@ -89,19 +89,19 @@ class TestPhtml(unittest.TestCase):
     def test_find_blocks(self):
         a1 = Block('a')
         a2 = Block('a')
-        b = Block('b')
+        x = Block('b')
         h = html(
             head(
                 title(Block('title'))
             ),
-            body(a1, a2, b)
+            body(a1, a2, x)
         )
         _a = h._find_blocks('a')
         self.assertEqual(len(_a), 2)
         self.assertIs(_a[0], a1)
         self.assertIs(_a[1], a2)
         _b = h._find_blocks('b')
-        self.assertEqual(_b[0], b)
+        self.assertEqual(_b[0], x)
 
     def test_reserved_keywords(self):
         t = div(class_='container')
@@ -127,9 +127,9 @@ class TestPhtml(unittest.TestCase):
         self.assertEqual(rendered, '<div>&lt;script&gt;</div>')
 
     def test_block_safe(self):
-        b = div('<script>')
-        b.safe = True
-        self.assertIn('<script>', str(b))
+        x = div('<script>')
+        x.safe = True
+        self.assertIn('<script>', str(x))
 
     def test_callable(self):
         tag = div(
@@ -245,12 +245,12 @@ qwerty</pre>
 
     def test_block(self):
         f = lambda ctx: 'callable'
-        b = Block('b')(
+        x = Block('b')(
             'text',
             f,
             div(),
         )
-        self.assertEqualWS(str(b), """text
+        self.assertEqualWS(str(x), """text
 callable
 <div></div>""")
 
