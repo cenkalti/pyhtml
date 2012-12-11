@@ -6,6 +6,8 @@ Lets create a tag.
 >>> t
 div()
 
+
+
 Tags can be rendered by converting to string.
 
 >>> str(t)
@@ -14,16 +16,22 @@ Tags can be rendered by converting to string.
 Printing an object automatically calls str() with object.
 I will keep printing tags in this tutorial for clarity.
 
+
+
 You can put a content into tags.
 >>> print div('content')
 <div>
   content
 </div>
 
+
+
 You can set attributes of tag.
 
 >>> print div(lang='tr', id='content')
 <div id="content" lang="tr"></div>
+
+
 
 Or both:
 
@@ -31,6 +39,8 @@ Or both:
 <div lang="tr">
   content
 </div>
+
+
 
 Content can be anything which can be converted to string.
 
@@ -48,6 +58,8 @@ If content is a callable, it will be called with a one argument
   Hello Cenk
 </div>
 
+
+
 You can give list of items as content.
 
 >>> print div(nav(), greet, hr())
@@ -56,6 +68,8 @@ You can give list of items as content.
   Hello guest
   <hr/>
 </div>
+
+
 
 You can nest tags.
 
@@ -68,6 +82,8 @@ You can nest tags.
   </div>
 </div>
 
+
+
 Some tags have sensible defaults.
 
 >>> print form()
@@ -76,6 +92,8 @@ Some tags have sensible defaults.
 >>> print html()
 <!DOCTYPE html>
 <html></html>
+
+
 
 Full example:
 (Backslashes on the right are only required here to pass doctests)
