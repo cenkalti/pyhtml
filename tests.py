@@ -1,5 +1,4 @@
 # -*- coding: utf8 -*-
-
 import unittest
 from phtml import *
 

@@ -1,15 +1,5 @@
-import sys
 from copy import deepcopy
 from cStringIO import StringIO
-
-
-# Filled by export decorator
-__all__ = []
-
-
-def export(obj):
-    __all__.append(obj.__name__)
-    return obj
 
 
 INDENT_SIZE = 2
@@ -26,7 +16,6 @@ def escape(text, quote=True):
     return text
 
 
-@export
 class Block(object):
     """List of renderable items."""
 
@@ -62,7 +51,7 @@ class Block(object):
         if isinstance(child, Block):
             child.__str__(out, indent, **context)
         else:
-            if callable(child) and not isinstance(child, TagMeta):
+            if callable(child) and not isinstance(child, _TagMeta):
                 s = child(context)
             else:
                 s = child
@@ -73,7 +62,7 @@ class Block(object):
             else:
                 s = str(s)
 
-            if not isinstance(child, TagMeta):
+            if not isinstance(child, _TagMeta):
                 if not self.safe:
                     s = escape(s)
 
@@ -110,7 +99,7 @@ class Block(object):
         return blocks
 
 
-class TagMeta(type):
+class _TagMeta(type):
     """Type of the Tag. (type(Tag) == TagMeta)
     """
     def __str__(cls):
@@ -118,10 +107,9 @@ class TagMeta(type):
         return '<%s></%s>' % (cls.__name__, cls.__name__)
 
 
-@export
 class Tag(Block):
 
-    __metaclass__ = TagMeta
+    __metaclass__ = _TagMeta
 
     doctype = None
 
@@ -199,7 +187,7 @@ class Tag(Block):
         return self.__class__.__name__
 
 
-class SelfClosingTagMeta(TagMeta):
+class _SelfClosingTagMeta(_TagMeta):
     def __str__(cls):
         """Renders as self closing tag."""
         return '<%s/>' % cls.__name__
@@ -207,7 +195,7 @@ class SelfClosingTagMeta(TagMeta):
 
 class SelfClosingTag(Tag):
 
-    __metaclass__ = SelfClosingTagMeta
+    __metaclass__ = _SelfClosingTagMeta
 
     def __init__(self, **attributes):
         super(SelfClosingTag, self).__init__(**attributes)
@@ -237,42 +225,81 @@ class WhitespaceSensitiveTag(Tag):
     whitespace_sensitive = True
 
 
-tags = (
-    'head body title ' +  # Main elements
-    'div p ' +  # Blocks
-    'h1 h2 h3 h4 h5 h6 ' +  # Headers
-    'u b i s a em strong span font ' +  # Inline markup
-    'del ins ' +  # Annotation
-    'ul ol li dd dt dl ' +  # Lists
-    'article section nav aside header footer ' +  # HTML5
-    'audio video object_ embed param ' +  # Media
-    'fieldset legend button textarea label select option ' +  # Forms
-    'table thead tbody tr th td caption ' +  # Tables
-    'blockquote cite q abbr acronym address ' +  # Citation, quotes etc
-    '').split()
+class head(Tag): pass
+class body(Tag): pass
+class title(Tag): pass
+class div(Tag): pass
+class p(Tag): pass
+class h1(Tag): pass
+class h2(Tag): pass
+class h3(Tag): pass
+class h4(Tag): pass
+class h5(Tag): pass
+class h6(Tag): pass
+class u(Tag): pass
+class b(Tag): pass
+class i(Tag): pass
+class s(Tag): pass
+class a(Tag): pass
+class em(Tag): pass
+class strong(Tag): pass
+class span(Tag): pass
+class font(Tag): pass
+class del_(Tag): pass
+class ins(Tag): pass
+class ul(Tag): pass
+class ol(Tag): pass
+class li(Tag): pass
+class dd(Tag): pass
+class dt(Tag): pass
+class dl(Tag): pass
+class article(Tag): pass
+class section(Tag): pass
+class nav(Tag): pass
+class aside(Tag): pass
+class header(Tag): pass
+class footer(Tag): pass
+class audio(Tag): pass
+class video(Tag): pass
+class object_(Tag): pass
+class embed(Tag): pass
+class param(Tag): pass
+class fieldset(Tag): pass
+class legend(Tag): pass
+class button(Tag): pass
+class textarea(Tag): pass
+class label(Tag): pass
+class select(Tag): pass
+class option(Tag): pass
+class table(Tag): pass
+class thead(Tag): pass
+class tbody(Tag): pass
+class tr(Tag): pass
+class th(Tag): pass
+class td(Tag): pass
+class caption(Tag): pass
+class blockquote(Tag): pass
+class cite(Tag): pass
+class q(Tag): pass
+class abbr(Tag): pass
+class acronym(Tag): pass
+class address(Tag): pass
 
-self_closing_tags = 'meta link br hr input'.split()
 
-whitespace_sensitive_tags = 'code samp pre var kbd dfn'.split()
-
-
-def register(tags, cls):
-    """Create tags and add to this module's namespace."""
-    this_module = sys.modules[__name__]
-    for tag_name in tags:
-        tag = create_tag(tag_name, cls)
-        setattr(this_module, tag_name, tag)
-        export(tag)
+class meta(SelfClosingTag): pass
+class link(SelfClosingTag): pass
+class br(SelfClosingTag): pass
+class hr(SelfClosingTag): pass
+class input(SelfClosingTag): pass
 
 
-def create_tag(name, cls):
-    return type(name, (cls, object), dict(cls.__dict__))
+class code(WhitespaceSensitiveTag): pass
+class samp(WhitespaceSensitiveTag): pass
+class pre(WhitespaceSensitiveTag): pass
+class var(WhitespaceSensitiveTag): pass
+class kbd(WhitespaceSensitiveTag): pass
+class dfn(WhitespaceSensitiveTag): pass
 
-register(tags, Tag)
-register(self_closing_tags, SelfClosingTag)
-register(whitespace_sensitive_tags, WhitespaceSensitiveTag)
 
-
-@export
 class html(Tag):
     doctype = '<!DOCTYPE html>'
