@@ -419,6 +419,7 @@ class link(SelfClosingTag): pass
 class br(SelfClosingTag): pass
 class hr(SelfClosingTag): pass
 class input(SelfClosingTag): pass
+class img(SelfClosingTag): pass
 
 
 class code(WhitespaceSensitiveTag): pass
