@@ -111,6 +111,7 @@ class Tag(Block):
 
     __metaclass__ = _TagMeta
 
+    attributes = {}
     doctype = None
 
     def __init__(self, *children, **attributes):
@@ -119,7 +120,9 @@ class Tag(Block):
                 or (not children and not attributes))
 
         self.children = children
-        self.attributes = attributes
+
+        self.attributes = self.attributes.copy()
+        self.attributes.update(attributes)
 
     def __call__(self, *children):
         """Set children of this tag."""
@@ -303,3 +306,15 @@ class dfn(WhitespaceSensitiveTag): pass
 
 class html(Tag):
     doctype = '<!DOCTYPE html>'
+
+
+class script(Tag):
+    attributes = {'type': 'text/javascript'}
+
+
+class style(Tag):
+    attributes = {'type': 'text/css'}
+
+
+class form(Tag):
+    attributes = {'method': 'POST'}

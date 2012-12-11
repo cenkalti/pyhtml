@@ -253,6 +253,10 @@ qwerty</pre>
 callable
 <div></div>""")
 
+    def test_default_attr(self):
+        f = form()
+        self.assertEqual(str(f), '<form method="POST"></form>')
+
 
 if __name__ == "__main__":
     unittest.main()
