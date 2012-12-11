@@ -257,6 +257,11 @@ callable
         f = form()
         self.assertEqual(str(f), '<form method="POST"></form>')
 
+    def test_lazy_attr(self):
+        f = lambda ctx: 'x'
+        d = div(name=f)
+        self.assertEqual(str(d), '<div name="x"></div>')
+
 
 if __name__ == "__main__":
     unittest.main()

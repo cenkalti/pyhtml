@@ -148,7 +148,7 @@ class Tag(Block):
         # Open tag
         out.write('<%s' % self.name)
 
-        self._write_attributes(out)
+        self._write_attributes(out, context)
 
         # Close opening tag
         out.write('>')
@@ -172,13 +172,16 @@ class Tag(Block):
 
         return out.getvalue()
 
-    def _write_attributes(self, out):
+    def _write_attributes(self, out, context):
         for k, v in self.attributes.items():
             # Some attribute names such as "class" conflict
             # with reserved keywords in Python. These must
             # be postfixed with underscore by user.
             if k.endswith('_'):
                 k = k.rstrip('_')
+
+            if callable(v):
+                v = v(context)
 
             if isinstance(v, unicode):
                 v = v.encode('utf-8')
@@ -216,7 +219,7 @@ class SelfClosingTag(Tag):
         # Open tag
         out.write('<%s' % self.name)
 
-        self._write_attributes(out)
+        self._write_attributes(out, context)
 
         # Close tag
         out.write('/>')
