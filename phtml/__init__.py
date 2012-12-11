@@ -295,20 +295,20 @@ class Tag(Block):
         return out.getvalue()
 
     def _write_attributes(self, out, context):
-        for k, v in self.attributes.items():
+        for key, value in sorted(self.attributes.items()):
             # Some attribute names such as "class" conflict
             # with reserved keywords in Python. These must
             # be postfixed with underscore by user.
-            if k.endswith('_'):
-                k = k.rstrip('_')
+            if key.endswith('_'):
+                key = key.rstrip('_')
 
-            if callable(v):
-                v = v(context)
+            if callable(value):
+                value = value(context)
 
-            if isinstance(v, unicode):
-                v = v.encode('utf-8')
+            if isinstance(value, unicode):
+                value = value.encode('utf-8')
 
-            out.write(' %s="%s"' % (k, v))
+            out.write(' %s="%s"' % (key, value))
 
     @property
     def name(self):
