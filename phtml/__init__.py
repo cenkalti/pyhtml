@@ -51,37 +51,40 @@ class Block(object):
         is_last_item = lambda: i == len(self.children) - 1
 
         for i, child in enumerate(self.children):
-            if isinstance(child, Block):
-                child.__str__(out, indent, **context)
-            else:
-                if callable(child) and not isinstance(child, TagMeta):
-                    s = child(context)
-                else:
-                    s = child
-
-                # Convert to string
-                if isinstance(s, unicode):
-                    s = s.encode('utf-8')
-                else:
-                    s = str(s)
-
-                if not isinstance(child, TagMeta):
-                    if not self.safe:
-                        s = escape(s)
-
-                # Write content
-                if not self.whitespace_sensitive:
-                    lines = s.splitlines(True)
-                    for line in lines:
-                        out.write(' ' * indent)
-                        out.write(line)
-                else:
-                    out.write(s)
+            self._write_single(out, child, indent, context)
 
             if not self.whitespace_sensitive and not is_last_item():
                 out.write('\n')
 
         return out.getvalue()
+
+    def _write_single(self, out, child, indent, context):
+        if isinstance(child, Block):
+            child.__str__(out, indent, **context)
+        else:
+            if callable(child) and not isinstance(child, TagMeta):
+                s = child(context)
+            else:
+                s = child
+
+            # Convert to string
+            if isinstance(s, unicode):
+                s = s.encode('utf-8')
+            else:
+                s = str(s)
+
+            if not isinstance(child, TagMeta):
+                if not self.safe:
+                    s = escape(s)
+
+            # Write content
+            if not self.whitespace_sensitive:
+                lines = s.splitlines(True)
+                for line in lines:
+                    out.write(' ' * indent)
+                    out.write(line)
+            else:
+                out.write(s)
 
     def copy(self):
         return deepcopy(self)
