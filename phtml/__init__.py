@@ -1,3 +1,125 @@
+"""
+
+Lets create a tag.
+
+>>> t = div()
+>>> t
+div()
+
+Tags can be rendered by converting to string.
+
+>>> str(t)
+'<div></div>'
+
+Printing an object automatically calls str() with object.
+I will keep printing tags in this tutorial for clarity.
+
+You can put a content into tags.
+>>> print div('content')
+<div>
+  content
+</div>
+
+You can set attributes of tag.
+
+>>> print div(lang='tr', id='content')
+<div id="content" lang="tr"></div>
+
+Or both:
+
+>>> print div(lang='tr')('content')
+<div lang="tr">
+  content
+</div>
+
+Content can be anything which can be converted to string.
+
+If content is a callable, it will be called with a one argument
+    which is the context dict you pass to render().
+
+>>> greet = lambda ctx: 'Hello %s' % ctx.get('user', 'guest')
+>>> greeting = div(greet)
+>>> print greeting
+<div>
+  Hello guest
+</div>
+>>> print greeting.render(user='Cenk')
+<div>
+  Hello Cenk
+</div>
+
+You can give list of items as content.
+
+>>> print div(nav(), greet, hr())
+<div>
+  <nav></nav>
+  Hello guest
+  <hr/>
+</div>
+
+You can nest tags.
+
+>>> print div(div(p('a paragraph')))
+<div>
+  <div>
+    <p>
+      a paragraph
+    </p>
+  </div>
+</div>
+
+Some tags have sensible defaults.
+
+>>> print form()
+<form method="POST"></form>
+
+>>> print html()
+<!DOCTYPE html>
+<html></html>
+
+Full example:
+(Backslashes on the right are only required here to pass doctests)
+
+>>> print html(                                         \
+    head(                                               \
+        title('Awesome website'),                       \
+        script(src="http://path.to/script.js")          \
+    ),                                                  \
+    body(                                               \
+        header(                                         \
+            img(src='/path/to/logo.png'),               \
+        ),                                              \
+        div(                                            \
+            'Content here'                              \
+        ),                                              \
+        footer(                                         \
+            'Copyright 2012'                            \
+        )                                               \
+    )                                                   \
+)
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      Awesome website
+    </title>
+    <script src="http://path.to/script.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <header>
+      <img src="/path/to/logo.png"/>
+    </header>
+    <div>
+      Content here
+    </div>
+    <footer>
+      Copyright 2012
+    </footer>
+  </body>
+</html>
+
+"""
+
 from copy import deepcopy
 from cStringIO import StringIO
 
@@ -321,3 +443,8 @@ class style(Tag):
 
 class form(Tag):
     attributes = {'method': 'POST'}
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
