@@ -26,6 +26,18 @@ You can put a content into tags.
 
 
 
+Parantheses can be omitted if the tag has no content.
+>>> print div
+<div></div>
+
+
+
+Soma tags are self closing.
+>>> print hr
+<hr/>
+
+
+
 You can set attributes of tag.
 
 >>> print div(lang='tr', id='content')
@@ -62,7 +74,7 @@ If content is a callable, it will be called with a one argument
 
 You can give list of items as content.
 
->>> print div(nav(), greet, hr())
+>>> print div(nav(), greet, hr)
 <div>
   <nav></nav>
   Hello guest
