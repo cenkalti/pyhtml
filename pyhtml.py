@@ -1,5 +1,13 @@
 """
 
+PyHTML
+======
+
+Simple HTML generator for Python.
+
+
+Usage:
+
 Lets create a tag.
 
 >>> t = div()
@@ -7,15 +15,13 @@ Lets create a tag.
 div()
 
 
-
 Tags can be rendered by converting to string.
 
 >>> str(t)
 '<div></div>'
 
-Printing an object automatically calls str() with object.
+Printing an object automatically calls str() with that object.
 I will keep printing tags in this tutorial for clarity.
-
 
 
 You can put a content into tags.
@@ -25,24 +31,28 @@ You can put a content into tags.
 </div>
 
 
-
 Parantheses can be omitted if the tag has no content.
 >>> print div
 <div></div>
 
 
-
-Soma tags are self closing.
+Some tags are self closing.
 >>> print hr
 <hr/>
 
 
-
-You can set attributes of tag.
+You can set attributes of the tag.
 
 >>> print div(lang='tr', id='content')
 <div id="content" lang="tr"></div>
 
+
+You can set contents of the tag.
+
+>>> print div('content')
+<div>
+  content
+</div>
 
 
 Or both:
@@ -51,7 +61,6 @@ Or both:
 <div lang="tr">
   content
 </div>
-
 
 
 Content can be anything which can be converted to string.
@@ -71,7 +80,6 @@ If content is a callable, it will be called with a one argument
 </div>
 
 
-
 You can give list of items as content.
 
 >>> print div(nav(), greet, hr)
@@ -80,7 +88,6 @@ You can give list of items as content.
   Hello guest
   <hr/>
 </div>
-
 
 
 You can nest tags.
@@ -95,7 +102,6 @@ You can nest tags.
 </div>
 
 
-
 Some tags have sensible defaults.
 
 >>> print form()
@@ -104,7 +110,6 @@ Some tags have sensible defaults.
 >>> print html()
 <!DOCTYPE html>
 <html></html>
-
 
 
 Full example:
