@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 import unittest
-from phtml import *
+from pyhtml import *
 
 
 class TestPhtml(unittest.TestCase):
@@ -44,27 +44,27 @@ class TestPhtml(unittest.TestCase):
 
     def test_block_fill_str(self):
         h = div(
-            head(title('phtml is awesome')),
+            head(title('pyhtml is awesome')),
             body(
                 p('a paragraph'),
                 Block('main')
             )
         )
         h['main'] = 'yess'
-        self.assertEqual(str(h), '<div><head><title>phtml is awesome'
+        self.assertEqual(str(h), '<div><head><title>pyhtml is awesome'
                                  '</title></head><body><p>a paragraph</p>'
                                  'yess</body></div>')
 
     def test_block_fill_tag(self):
         h = div(
-            head(title('phtml is awesome')),
+            head(title('pyhtml is awesome')),
             body(
                 p('a paragraph'),
                 Block('main')
             )
         )
         h['main'] = hr
-        self.assertEqual(str(h), '<div><head><title>phtml is awesome'
+        self.assertEqual(str(h), '<div><head><title>pyhtml is awesome'
                                  '</title></head><body><p>a paragraph</p>'
                                  '<hr/></body></div>')
 
