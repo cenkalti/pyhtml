@@ -155,6 +155,7 @@ Full example:
 from copy import deepcopy
 from cStringIO import StringIO
 
+__version__ = '0.1.0'
 
 INDENT_SIZE = 2
 
