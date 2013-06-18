@@ -15,14 +15,18 @@ class TestPhtml(unittest.TestCase):
             else:
                 return s
         first = remove_whitespace(first)
+        print first
         second = remove_whitespace(second)
         return super(TestPhtml, self).assertEqual(first, second, msg)
 
     def test_repr(self):
-        t = html()
-        x = Block('x')
-        self.assertEqualWS(repr(t), 'html()')
-        self.assertEqualWS(repr(x), "Block('x')")
+        self.assertEqualWS(repr(div), 'div')
+        self.assertEqualWS(repr(div()), 'div()')
+        self.assertEqualWS(repr(div(a=1)), 'div(a=1)')
+        self.assertEqualWS(repr(div("asdf")), "div('asdf')")
+        self.assertEqualWS(repr(div(a=1)("asdf")), "div(a=1)('asdf')")
+        # TODO test block repr
+        # self.assertEqualWS(repr(Block('x')), "Block('x')")
 
     def test_tag(self):
         self.assertEqual(str(hr), '<hr/>')

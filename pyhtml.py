@@ -159,6 +159,7 @@ Full example:
 
 from copy import deepcopy
 from cStringIO import StringIO
+from types import GeneratorType
 
 __version__ = '0.1.0'
 
@@ -176,102 +177,28 @@ def escape(text, quote=True):
     return text
 
 
-class Block(object):
-    """List of renderable items."""
-
-    whitespace_sensitive = False
-    safe = False
-
-    def __init__(self, name):
-        self.name = name
-        self.children = ()
-
-    def __repr__(self):
-        return 'Block(%r)' % self.name
-
-    def __call__(self, *children):
-        self.children = children
-        return self
-
-    def __str__(self, out=None, indent=0, **context):
-        if out is None:
-            out = StringIO()
-
-        is_last_item = lambda: i == len(self.children) - 1
-
-        for i, child in enumerate(self.children):
-            self._write_single(out, child, indent, context)
-
-            if not self.whitespace_sensitive and not is_last_item():
-                out.write('\n')
-
-        return out.getvalue()
-
-    def _write_single(self, out, child, indent, context):
-        if isinstance(child, Block):
-            child.__str__(out, indent, **context)
-        else:
-            if callable(child) and not isinstance(child, _TagMeta):
-                s = child(context)
-            else:
-                s = child
-
-            # Convert to string
-            if isinstance(s, unicode):
-                s = s.encode('utf-8')
-            else:
-                s = str(s)
-
-            if not isinstance(child, _TagMeta):
-                if not self.safe:
-                    s = escape(s)
-
-            # Write content
-            if not self.whitespace_sensitive:
-                lines = s.splitlines(True)
-                for line in lines:
-                    out.write(' ' * indent)
-                    out.write(line)
-            else:
-                out.write(s)
-
-    def copy(self):
-        return deepcopy(self)
-
-    def render(self, **context):
-        return self.__str__(**context)
-
-    def __setitem__(self, block_name, *children):
-        """Fill all the Blocks with same block_name
-        in this tag recursively.
-        """
-        blocks = self._find_blocks(block_name)
-        for b in blocks:
-            b(*children)
-
-    def _find_blocks(self, name):
-        blocks = []
-        for i, c in enumerate(self.children):
-            if isinstance(c, Block) and c.name == name:
-                blocks.append(c)
-            elif isinstance(c, Tag):
-                blocks += c._find_blocks(name)
-        return blocks
-
-
 class _TagMeta(type):
     """Type of the Tag. (type(Tag) == TagMeta)
     """
     def __str__(cls):
         """Renders as empty tag."""
-        return '<%s></%s>' % (cls.__name__, cls.__name__)
+        if cls.self_closing:
+            return '<%s/>' % cls.__name__
+        else:
+            return '<%s></%s>' % (cls.__name__, cls.__name__)
+
+    def __repr__(cls):
+        return cls.__name__
 
 
-class Tag(Block):
+class Tag(object):
 
     __metaclass__ = _TagMeta
 
-    attributes = {}
+    safe = False  # do not escape while rendering
+    self_closing = False
+    whitespace_sensitive = False
+    default_attributes = {}
     doctype = None
 
     def __init__(self, *children, **attributes):
@@ -279,20 +206,50 @@ class Tag(Block):
         assert ((bool(children) ^ bool(attributes))
                 or (not children and not attributes))
 
+        if self.self_closing and children:
+            raise Exception("Self closing tag can't have children")
+
         self.children = children
 
-        self.attributes = self.attributes.copy()
+        self.attributes = self.default_attributes.copy()
         self.attributes.update(attributes)
 
     def __call__(self, *children):
-        """Set children of this tag."""
+        if self.self_closing:
+            raise Exception("Self closing tag can't have children")
+
         self.children = children
         return self
 
     def __repr__(self):
-        return '%s()' % self.name
+        if self.attributes and not self.children:
+            return "%s(%s)" % (self.name, self._repr_attributes())
+        elif self.children and not self.attributes:
+            return "%s(%s)" % (self.name, self._repr_children())
+        elif self.attributes and self.children:
+            return "%s(%s)(%s)" % (self.name,
+                                   self._repr_attributes(),
+                                   self._repr_children())
+        else:
+            return "%s()" % self.name
 
-    def __str__(self, out=None, indent=0, **context):
+    def _repr_attributes(self):
+        return ', '.join("%s=%r" % (key, value) for key, value in self.attributes.iteritems())
+
+    def _repr_children(self):
+        return ', '.join(repr(child) for child in self.children)
+
+    def __str__(self):
+        return self.render()
+
+    @property
+    def name(self):
+        return self.__class__.__name__
+
+    def copy(self):
+        return deepcopy(self)
+
+    def render(self, out=None, indent=0, **context):
         if out is None:
             out = StringIO()
 
@@ -310,6 +267,10 @@ class Tag(Block):
 
         self._write_attributes(out, context)
 
+        if self.self_closing:
+            out.write('/>')
+            return out.getvalue()
+
         # Close opening tag
         out.write('>')
 
@@ -319,7 +280,7 @@ class Tag(Block):
                 out.write('\n')
 
             # Write content
-            super(Tag, self).__str__(out, indent + INDENT_SIZE, **context)
+            self._write_children(out, indent + INDENT_SIZE, **context)
 
             if not self.whitespace_sensitive:
                 # Newline after content
@@ -331,6 +292,50 @@ class Tag(Block):
         out.write('</%s>' % self.name)
 
         return out.getvalue()
+
+    def _write_children(self, out=None, indent=0, **context):
+        if out is None:
+            out = StringIO()
+
+        is_last_item = lambda: i == len(self.children) - 1
+
+        for i, child in enumerate(self.children):
+            self._write_single(out, child, indent, context)
+
+            if not self.whitespace_sensitive and not is_last_item():
+                out.write('\n')
+
+        return out.getvalue()
+
+    def _write_single(self, out, child, indent, context):
+        if isinstance(child, (Tag, Block)):
+            child.render(out, indent, **context)
+        else:
+            if callable(child) and not isinstance(child, _TagMeta):
+                rv = child(context)
+                self._write_single(out, rv, indent, context)
+            elif isinstance(child, GeneratorType):
+                raise NotImplementedError
+            else:
+                if isinstance(child, unicode):
+                    s = child.encode('utf8')
+                elif child is None:
+                    s = ''
+                else:
+                    s = str(child)
+
+                if not isinstance(child, _TagMeta):
+                    if not self.safe:
+                        s = escape(s)
+
+                # Write content
+                if not self.whitespace_sensitive:
+                    lines = s.splitlines(True)
+                    for line in lines:
+                        out.write(' ' * indent)
+                        out.write(line)
+                else:
+                    out.write(s)
 
     def _write_attributes(self, out, context):
         for key, value in sorted(self.attributes.items()):
@@ -348,47 +353,36 @@ class Tag(Block):
 
             out.write(' %s="%s"' % (key, value))
 
-    @property
-    def name(self):
-        return self.__class__.__name__
+    def __setitem__(self, block_name, *children):
+        """Fill all the Blocks with same block_name
+        in this tag recursively.
+        """
+        blocks = self._find_blocks(block_name)
+        for b in blocks:
+            b(*children)
+
+    def _find_blocks(self, block_name):
+        blocks = []
+        for i, c in enumerate(self.children):
+            if isinstance(c, Block) and c.block_name == block_name:
+                blocks.append(c)
+            elif isinstance(c, Tag):
+                blocks += c._find_blocks(block_name)
+        return blocks
 
 
-class _SelfClosingTagMeta(_TagMeta):
-    def __str__(cls):
-        """Renders as self closing tag."""
-        return '<%s/>' % cls.__name__
+class Block(Tag):
+    """List of renderable items."""
 
+    def __init__(self, name):
+        self.block_name = name
+        self.children = ()
 
-class SelfClosingTag(Tag):
+    def __repr__(self):
+        return 'Block(%r)' % self.name
 
-    __metaclass__ = _SelfClosingTagMeta
-
-    def __init__(self, **attributes):
-        super(SelfClosingTag, self).__init__(**attributes)
-
-    def __call__(self, *args, **kwargs):
-        raise Exception("Self closing tag can't have children")
-
-    def __str__(self, out=None, indent=0, **context):
-        if out is None:
-            out = StringIO()
-
-        # Indent
-        out.write(' ' * indent)
-
-        # Open tag
-        out.write('<%s' % self.name)
-
-        self._write_attributes(out, context)
-
-        # Close tag
-        out.write('/>')
-
-        return out.getvalue()
-
-
-class WhitespaceSensitiveTag(Tag):
-    whitespace_sensitive = True
+    def render(self, out=None, indent=0, **context):
+        return self._write_children(out, indent, **context)
 
 
 class head(Tag): pass
@@ -452,6 +446,9 @@ class acronym(Tag): pass
 class address(Tag): pass
 
 
+class SelfClosingTag(Tag):
+    self_closing = True
+
 class meta(SelfClosingTag): pass
 class link(SelfClosingTag): pass
 class br(SelfClosingTag): pass
@@ -459,6 +456,9 @@ class hr(SelfClosingTag): pass
 class input(SelfClosingTag): pass
 class img(SelfClosingTag): pass
 
+
+class WhitespaceSensitiveTag(Tag):
+    whitespace_sensitive = True
 
 class code(WhitespaceSensitiveTag): pass
 class samp(WhitespaceSensitiveTag): pass
@@ -473,15 +473,15 @@ class html(Tag):
 
 
 class script(Tag):
-    attributes = {'type': 'text/javascript'}
+    default_attributes = {'type': 'text/javascript'}
 
 
 class style(Tag):
-    attributes = {'type': 'text/css'}
+    default_attributes = {'type': 'text/css'}
 
 
 class form(Tag):
-    attributes = {'method': 'POST'}
+    default_attributes = {'method': 'POST'}
 
 
 if __name__ == "__main__":
