@@ -3,7 +3,7 @@ import unittest
 from pyhtml import *
 
 
-class TestPyhtml(unittest.TestCase):
+class TestPyHTML(unittest.TestCase):
 
     assertEqualWS = unittest.TestCase.assertEqual
 
@@ -16,7 +16,7 @@ class TestPyhtml(unittest.TestCase):
                 return s
         first = remove_whitespace(first)
         second = remove_whitespace(second)
-        return super(TestPyhtml, self).assertEqual(first, second, msg)
+        return super(TestPyHTML, self).assertEqual(first, second, msg)
 
     def test_repr_tag(self):
         self.assertEqualWS(repr(div), 'div')
@@ -47,6 +47,24 @@ class TestPyhtml(unittest.TestCase):
         self.assertEqual(str(div(lang='tr')('')), '<div lang="tr"></div>')
         self.assertEqual(str(div(lang='tr')('content')), '<div lang="tr">'
                                                          'content</div>')
+
+    def test_render_tag_callable_str(self):
+        f = lambda ctx: 'asdf'
+        self.assertEqual(str(div(f)), '<div>asdf</div>')
+
+    def test_render_tag_callable_none(self):
+        n = lambda ctx: None
+        self.assertEqual(str(div(n)), '<div></div>')
+
+    def test_render_tag_callable_generator(self):
+        def g(ctx):
+            yield 1
+            yield 2
+        self.assertEqual(str(div(g)), '<div>12</div>')
+
+    def test_render_tag_callable_list(self):
+        l = lambda ctx: ['a', 'b']
+        self.assertEqual(str(div(l)), '<div>ab</div>')
 
     def test_render_block(self):
         self.assertEqual(str(Block('b')), '')
@@ -79,7 +97,7 @@ class TestPyhtml(unittest.TestCase):
                                  '</title></head><body><p>a paragraph</p>'
                                  '<hr/></body></div>')
 
-    def test_block_fill_lazy(self):
+    def test_block_fill_callable(self):
         class V(object):
             def __str__(self):
                 return 'asdf'
@@ -255,14 +273,19 @@ qwerty</pre>
 
     def test_block(self):
         f = lambda ctx: 'callable'
-        x = Block('b')(
-            'text',
-            f,
-            div(),
+        x = div(
+            Block('b')(
+                'text',
+                f,
+                div(),
+            )
         )
-        self.assertEqualWS(str(x), """text
-callable
-<div></div>""")
+        self.assertEqualWS(str(x), """\
+<div>
+  text
+  callable
+  <div></div>
+</div>""")
 
     def test_default_attr(self):
         f = form()

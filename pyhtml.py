@@ -280,7 +280,7 @@ class Tag(object):
                 _out.write('\n')
 
             # Write content
-            self._write_children(_out, context, _indent + INDENT_SIZE)
+            self._write_list(self.children, _out, context, _indent + 2)
 
             if not self.whitespace_sensitive:
                 # Newline after content
@@ -293,44 +293,48 @@ class Tag(object):
 
         return _out.getvalue()
 
-    def _write_children(self, out, context, indent=0):
-        is_last_item = lambda: i == len(self.children) - 1
-
-        for i, child in enumerate(self.children):
-            self._write_single(child, out, context, indent)
+    def _write_list(self, l, out, context, indent=0):
+        is_last_item = lambda: i == len(l) - 1
+        for i, child in enumerate(l):
+            self._write_item(child, out, context, indent)
 
             if not self.whitespace_sensitive and not is_last_item():
                 out.write('\n')
 
-    def _write_single(self, child, out, context, indent):
-        if isinstance(child, (Tag, Block)):
-            child.render(out, indent, **context)
+    def _write_item(self, item, out, context, indent):
+        if isinstance(item, Tag):
+            item.render(out, indent, **context)
+        elif isinstance(item, _TagMeta):
+            self._write_as_string(item, out, indent, escape_=False)
+        elif callable(item):
+            rv = item(context)
+            self._write_item(rv, out, context, indent)
+        elif isinstance(item, (GeneratorType, list, tuple)):
+            for item in item:
+                self._write_item(item, out, context, indent)
         else:
-            if callable(child) and not isinstance(child, _TagMeta):
-                rv = child(context)
-                self._write_single(rv, out, context, indent)
-            elif isinstance(child, GeneratorType):
-                raise NotImplementedError
-            else:
-                if isinstance(child, unicode):
-                    s = child.encode('utf-8')
-                elif child is None:
-                    s = ''
-                else:
-                    s = str(child)
+            self._write_as_string(item, out, indent)
 
-                if not isinstance(child, _TagMeta):
-                    if not self.safe:
-                        s = escape(s)
+    def _write_as_string(self, s, out, indent, escape_=True):
+        if isinstance(s, unicode):
+            s = s.encode('utf-8')
+        elif s is None:
+            s = ''
+        else:
+            s = str(s)
 
-                # Write content
-                if not self.whitespace_sensitive:
-                    lines = s.splitlines(True)
-                    for line in lines:
-                        out.write(' ' * indent)
-                        out.write(line)
-                else:
-                    out.write(s)
+        if escape_:
+            if not self.safe:
+                s = escape(s)
+
+        # Write content
+        if not self.whitespace_sensitive:
+            lines = s.splitlines(True)
+            for line in lines:
+                out.write(' ' * indent)
+                out.write(line)
+        else:
+            out.write(s)
 
     def _write_attributes(self, out, context):
         for key, value in sorted(self.attributes.items()):
@@ -383,7 +387,7 @@ class Block(Tag):
         if _out is None:
             _out = StringIO()
 
-        self._write_children(_out, context, _indent)
+        self._write_list(self.children, _out, context, _indent)
         return _out.getvalue()
 
 
