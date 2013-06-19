@@ -374,7 +374,10 @@ class Block(Tag):
         self.children = ()
 
     def __repr__(self):
-        return 'Block(%r)' % self.block_name
+        if not self.children:
+            return 'Block(%r)' % self.block_name
+        else:
+            return 'Block(%r)(%s)' % (self.block_name, self._repr_children())
 
     def render(self, _out=None, _indent=0, **context):
         if _out is None:

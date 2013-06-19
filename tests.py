@@ -3,7 +3,7 @@ import unittest
 from pyhtml import *
 
 
-class TestPhtml(unittest.TestCase):
+class TestPyhtml(unittest.TestCase):
 
     assertEqualWS = unittest.TestCase.assertEqual
 
@@ -15,20 +15,22 @@ class TestPhtml(unittest.TestCase):
             else:
                 return s
         first = remove_whitespace(first)
-        print first
         second = remove_whitespace(second)
-        return super(TestPhtml, self).assertEqual(first, second, msg)
+        return super(TestPyhtml, self).assertEqual(first, second, msg)
 
-    def test_repr(self):
+    def test_repr_tag(self):
         self.assertEqualWS(repr(div), 'div')
         self.assertEqualWS(repr(div()), 'div()')
         self.assertEqualWS(repr(div(a=1)), 'div(a=1)')
         self.assertEqualWS(repr(div("asdf")), "div('asdf')")
         self.assertEqualWS(repr(div(a=1)("asdf")), "div(a=1)('asdf')")
-        # TODO test block repr
-        # self.assertEqualWS(repr(Block('x')), "Block('x')")
 
-    def test_tag(self):
+    def test_repr_block(self):
+        self.assertEqualWS(repr(Block('x')), "Block('x')")
+        self.assertEqualWS(repr(Block('x')('asdf')), "Block('x')('asdf')")
+        self.assertEqualWS(repr(Block('x')(1, 2)), "Block('x')(1, 2)")
+
+    def test_render_tag(self):
         self.assertEqual(str(hr), '<hr/>')
         self.assertEqual(str(div), '<div></div>')
         self.assertEqual(str(div()), '<div></div>')
@@ -45,6 +47,11 @@ class TestPhtml(unittest.TestCase):
         self.assertEqual(str(div(lang='tr')('')), '<div lang="tr"></div>')
         self.assertEqual(str(div(lang='tr')('content')), '<div lang="tr">'
                                                          'content</div>')
+
+    def test_render_block(self):
+        self.assertEqual(str(Block('b')), '')
+        self.assertEqual(str(Block('b')('asdf')), 'asdf')
+        self.assertEqual(str(Block('b')(div())), '<div></div>')
 
     def test_block_fill_str(self):
         h = div(
