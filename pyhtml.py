@@ -166,7 +166,7 @@ __version__ = '0.1.0'
 INDENT_SIZE = 2
 
 
-def escape(text, quote=True):
+def escape(text, quote=False):
     for k, v in ('&', '&amp;'), ('<', '&lt;'), ('>', '&gt;'):
         text = text.replace(k, v)
 
@@ -349,6 +349,11 @@ class Tag(object):
 
             if isinstance(value, unicode):
                 value = value.encode('utf-8')
+
+            if not isinstance(value, str):
+                value = str(value)
+
+            value = escape(value, quote=True)
 
             out.write(' %s="%s"' % (key, value))
 

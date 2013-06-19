@@ -9,7 +9,7 @@ from jinja2 import Environment as JinjaEnvironment
 
 context = {
     'page_title': 'mitsuhiko\'s benchmark',
-    'table': [dict(a=1,b=2,c=3,d=4,e=5,f=6,g=7,h=8,i=9,j=10) for x in range(100)]
+    'table': [dict(a=1,b=2,c=3,d=4,e=5,f=6,g=7,h=8,i=9,j=10) for x in range(10)]
 }
 
 jinja_template = JinjaEnvironment(
@@ -64,11 +64,8 @@ def f_navigation(ctx):
         items.append(item)
     return Block('_')(*items)
 
-def f_table(ctx):
-    return Block('_')(*f_rows(ctx['table']))
-
-def f_rows(rows):
-    for row in rows:
+def f_rows(ctx):
+    for row in ctx['table']:
         yield tr(*f_cells(row))
 
 def f_cells(row):
@@ -78,7 +75,7 @@ def f_cells(row):
 from pyhtml import *
 pyhtml_template = html(
     head(
-        title(Block('page_title'))
+        title(lambda ctx: ctx.get('page_title'))
     ),
     body(
         div(class_="header")(
@@ -86,13 +83,13 @@ pyhtml_template = html(
         ),
         ul(class_="navigation")(f_navigation),
         div(class_="table")(
-            table(f_table)
+            table(f_rows)
         )
     )
 )
 
 def test_pyhtml():
-    pyhtml_template.render(**context)
+    print pyhtml_template.render(**context)
 
 
 sys.stdout.write('\r' + '\n'.join((
