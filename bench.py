@@ -64,13 +64,10 @@ def f_navigation(ctx):
         items.append(item)
     return Block('_')(*items)
 
-def f_rows(ctx):
-    for row in ctx['table']:
-        yield tr(*f_cells(row))
-
-def f_cells(row):
-    for cell in row:
-        yield td(cell)
+def f_table(ctx):
+    return (tr(
+        td(cell) for cell in row
+    ) for row in ctx['table'])
 
 from pyhtml import *
 pyhtml_template = html(
@@ -83,7 +80,7 @@ pyhtml_template = html(
         ),
         ul(class_="navigation")(f_navigation),
         div(class_="table")(
-            table(f_rows)
+            table(f_table)
         )
     )
 )

@@ -269,37 +269,41 @@ class Tag(object):
 
         if self.self_closing:
             _out.write('/>')
-            return _out.getvalue()
+        else:
+            # Close opening tag
+            _out.write('>')
 
-        # Close opening tag
-        _out.write('>')
+            if self.children:
+                # Newline after opening tag
+                if not self.whitespace_sensitive:
+                    _out.write('\n')
 
-        if self.children:
-            # Newline after opening tag
-            if not self.whitespace_sensitive:
-                _out.write('\n')
+                # Write content
+                self._write_list(self.children, _out, context, _indent + 2)
 
-            # Write content
-            self._write_list(self.children, _out, context, _indent + 2)
+                if not self.whitespace_sensitive:
+                    # Newline after content
+                    _out.write('\n')
+                    # Indent closing tag
+                    _out.write(' ' * _indent)
 
-            if not self.whitespace_sensitive:
-                # Newline after content
-                _out.write('\n')
-                # Indent closing tag
-                _out.write(' ' * _indent)
-
-        # Write closing tag
-        _out.write('</%s>' % self.name)
+            # Write closing tag
+            _out.write('</%s>' % self.name)
 
         return _out.getvalue()
 
     def _write_list(self, l, out, context, indent=0):
-        is_last_item = lambda: i == len(l) - 1
-        for i, child in enumerate(l):
+        for child in l:
             self._write_item(child, out, context, indent)
 
-            if not self.whitespace_sensitive and not is_last_item():
+            # Write newline between items
+            if not self.whitespace_sensitive:
                 out.write('\n')
+        else:
+            # Remove the last newline
+            if not self.whitespace_sensitive:
+                out.seek(-1, 1)
+                out.truncate()
 
     def _write_item(self, item, out, context, indent):
         if isinstance(item, Tag):
@@ -310,8 +314,7 @@ class Tag(object):
             rv = item(context)
             self._write_item(rv, out, context, indent)
         elif isinstance(item, (GeneratorType, list, tuple)):
-            for item in item:
-                self._write_item(item, out, context, indent)
+            self._write_list(item, out, context, indent)
         else:
             self._write_as_string(item, out, indent)
 
