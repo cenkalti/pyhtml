@@ -498,6 +498,10 @@ class form(Tag):
     default_attributes = {'method': 'POST'}
 
 
+def var(var):
+    return lambda ctx: ctx.get(var)
+
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod()

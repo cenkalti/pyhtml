@@ -55,14 +55,11 @@ def test_jinja():
 
 
 def f_navigation(ctx):
-    items = []
     for href, caption in [
             ('index.html', 'Index'),
             ('downloads.html', 'Downloads'),
             ('products.html', 'Products')]:
-        item = li(a(href=href)(caption))
-        items.append(item)
-    return Block('_')(*items)
+        yield li(a(href=href)(caption))
 
 def f_table(ctx):
     return (tr(
@@ -72,11 +69,11 @@ def f_table(ctx):
 from pyhtml import *
 pyhtml_template = html(
     head(
-        title(lambda ctx: ctx.get('page_title'))
+        title(var('page_title'))
     ),
     body(
         div(class_="header")(
-            h1(Block('page_title'))
+            h1(var('page_title'))
         ),
         ul(class_="navigation")(f_navigation),
         div(class_="table")(
@@ -86,7 +83,7 @@ pyhtml_template = html(
 )
 
 def test_pyhtml():
-    print pyhtml_template.render(**context)
+    pyhtml_template.render(**context)
 
 
 sys.stdout.write('\r' + '\n'.join((
