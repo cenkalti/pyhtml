@@ -487,6 +487,7 @@ class html(Tag):
 
 
 class script(Tag):
+    safe = True
     default_attributes = {'type': 'text/javascript'}
 
 
