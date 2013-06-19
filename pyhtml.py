@@ -280,7 +280,7 @@ class Tag(object):
                 out.write('\n')
 
             # Write content
-            self._write_children(out, indent + INDENT_SIZE, **context)
+            self._write_children(out, context, indent + INDENT_SIZE)
 
             if not self.whitespace_sensitive:
                 # Newline after content
@@ -293,32 +293,27 @@ class Tag(object):
 
         return out.getvalue()
 
-    def _write_children(self, out=None, indent=0, **context):
-        if out is None:
-            out = StringIO()
-
+    def _write_children(self, out, context, indent=0):
         is_last_item = lambda: i == len(self.children) - 1
 
         for i, child in enumerate(self.children):
-            self._write_single(out, child, indent, context)
+            self._write_single(child, out, context, indent)
 
             if not self.whitespace_sensitive and not is_last_item():
                 out.write('\n')
 
-        return out.getvalue()
-
-    def _write_single(self, out, child, indent, context):
+    def _write_single(self, child, out, context, indent):
         if isinstance(child, (Tag, Block)):
             child.render(out, indent, **context)
         else:
             if callable(child) and not isinstance(child, _TagMeta):
                 rv = child(context)
-                self._write_single(out, rv, indent, context)
+                self._write_single(rv, out, context, indent)
             elif isinstance(child, GeneratorType):
                 raise NotImplementedError
             else:
                 if isinstance(child, unicode):
-                    s = child.encode('utf8')
+                    s = child.encode('utf-8')
                 elif child is None:
                     s = ''
                 else:
@@ -379,10 +374,14 @@ class Block(Tag):
         self.children = ()
 
     def __repr__(self):
-        return 'Block(%r)' % self.name
+        return 'Block(%r)' % self.block_name
 
     def render(self, out=None, indent=0, **context):
-        return self._write_children(out, indent, **context)
+        if out is None:
+            out = StringIO()
+
+        self._write_children(out, context, indent)
+        return out.getvalue()
 
 
 class head(Tag): pass
