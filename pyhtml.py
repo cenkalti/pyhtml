@@ -249,49 +249,49 @@ class Tag(object):
     def copy(self):
         return deepcopy(self)
 
-    def render(self, out=None, indent=0, **context):
-        if out is None:
-            out = StringIO()
+    def render(self, _out=None, _indent=0, **context):
+        if _out is None:
+            _out = StringIO()
 
         # Write doctype
         if self.doctype:
-            out.write(' ' * indent)
-            out.write(self.doctype)
-            out.write('\n')
+            _out.write(' ' * _indent)
+            _out.write(self.doctype)
+            _out.write('\n')
 
         # Indent opening tag
-        out.write(' ' * indent)
+        _out.write(' ' * _indent)
 
         # Open tag
-        out.write('<%s' % self.name)
+        _out.write('<%s' % self.name)
 
-        self._write_attributes(out, context)
+        self._write_attributes(_out, context)
 
         if self.self_closing:
-            out.write('/>')
-            return out.getvalue()
+            _out.write('/>')
+            return _out.getvalue()
 
         # Close opening tag
-        out.write('>')
+        _out.write('>')
 
         if self.children:
             # Newline after opening tag
             if not self.whitespace_sensitive:
-                out.write('\n')
+                _out.write('\n')
 
             # Write content
-            self._write_children(out, context, indent + INDENT_SIZE)
+            self._write_children(_out, context, _indent + INDENT_SIZE)
 
             if not self.whitespace_sensitive:
                 # Newline after content
-                out.write('\n')
+                _out.write('\n')
                 # Indent closing tag
-                out.write(' ' * indent)
+                _out.write(' ' * _indent)
 
         # Write closing tag
-        out.write('</%s>' % self.name)
+        _out.write('</%s>' % self.name)
 
-        return out.getvalue()
+        return _out.getvalue()
 
     def _write_children(self, out, context, indent=0):
         is_last_item = lambda: i == len(self.children) - 1
@@ -376,12 +376,12 @@ class Block(Tag):
     def __repr__(self):
         return 'Block(%r)' % self.block_name
 
-    def render(self, out=None, indent=0, **context):
-        if out is None:
-            out = StringIO()
+    def render(self, _out=None, _indent=0, **context):
+        if _out is None:
+            _out = StringIO()
 
-        self._write_children(out, context, indent)
-        return out.getvalue()
+        self._write_children(_out, context, _indent)
+        return _out.getvalue()
 
 
 class head(Tag): pass
