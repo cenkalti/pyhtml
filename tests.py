@@ -296,6 +296,13 @@ qwerty</pre>
         d = div(name=f)
         self.assertEqual(str(d), '<div name="x"></div>')
 
+    def test_block_fill_multi(self):
+        x = div(
+            Block('b')('placeholder')
+        )
+        x['b'] = 'asdf', 123
+        self.assertEqual(str(x), """<div>asdf123</div>""")
+
 
 if __name__ == "__main__":
     unittest.main()
