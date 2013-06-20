@@ -47,12 +47,55 @@ Example
     print t.render(user='Cenk')
 
 
+The above code is rendered as:
+
+.. code-block:: html
+
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>
+          Awesome website
+        </title>
+        <script src="http://path.to/script.js" type="text/javascript"></script>
+      </head>
+      <body>
+        <header>
+          <img src="/path/to/logo.png"/>
+          <nav>
+            <ul>
+              <li>
+                <a href="/home.html">
+                  Home
+                </a>
+              </li>
+              <li>
+                <a href="/login.html">
+                  Login
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </header>
+        <div>
+          Hello Cenk
+          Content here
+        </div>
+        <footer>
+          <hr/>
+          Copyright 2013
+        </footer>
+      </body>
+    </html>
+
+
 Installing
 ----------
 
     pip install pyhtml
 
 or download pyhtml.py into your project directory. There are no hard dependencies other than the Python standard library. PyHTML is tested with Python 2.7 only.
+
 
 Documentation
 -------------
