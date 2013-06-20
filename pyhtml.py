@@ -66,7 +66,7 @@ Or both:
 Content can be anything which can be converted to string.
 
 If content is a callable, it will be called with a one argument
-    which is the context dict you pass to render().
+    that is the context you pass to render() as keyword arguments.
 
 >>> greet = lambda ctx: 'Hello %s' % ctx.get('user', 'guest')
 >>> greeting = div(greet)
@@ -88,6 +88,39 @@ You can give list of items as content.
   Hello guest
   <hr/>
 </div>
+
+
+You can give give a callable returning a list as content.
+
+>>> items = lambda ctx: [li('a'), li('b')]
+>>> print ul(items)
+<ul>
+  <li>
+    a
+  </li>
+  <li>
+    b
+  </li>
+</ul>
+
+
+You can give give a generator as content.
+
+>>> def items(ctx):
+...    for i in range(3):
+...        yield li(i)
+>>> print ul(items)
+<ul>
+  <li>
+    0
+  </li>
+  <li>
+    1
+  </li>
+  <li>
+    2
+  </li>
+</ul>
 
 
 You can nest tags.
@@ -113,26 +146,25 @@ Some tags have sensible defaults.
 
 
 Full example:
-(Backslashes on the right are only required here to pass doctests)
 
->>> print html(                                         \
-    head(                                               \
-        title('Awesome website'),                       \
-        script(src="http://path.to/script.js")          \
-    ),                                                  \
-    body(                                               \
-        header(                                         \
-            img(src='/path/to/logo.png'),               \
-        ),                                              \
-        div(                                            \
-            'Content here'                              \
-        ),                                              \
-        footer(                                         \
-            hr,                                         \
-            'Copyright 2012'                            \
-        )                                               \
-    )                                                   \
-)
+>>> print html(
+...     head(
+...         title('Awesome website'),
+...         script(src="http://path.to/script.js")
+...     ),
+...     body(
+...         header(
+...             img(src='/path/to/logo.png'),
+...         ),
+...         div(
+...             'Content here'
+...         ),
+...         footer(
+...             hr,
+...             'Copyright 2012'
+...         )
+...     )
+... )
 <!DOCTYPE html>
 <html>
   <head>
