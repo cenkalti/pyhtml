@@ -191,6 +191,9 @@ Full example:
 
 from copy import deepcopy
 from cStringIO import StringIO
+# Python-based StringIO is needed if we want to work with unicode strings.
+# cStringIO only works with byte strings.
+from StringIO import StringIO as StringIOUnicode
 from types import GeneratorType
 
 __version__ = '0.1.0'
@@ -274,6 +277,9 @@ class Tag(object):
     def __str__(self):
         return self.render()
 
+    def __unicode__(self):
+        return self.render(_out=StringIOUnicode(u''))
+
     @property
     def name(self):
         return self.__class__.__name__
@@ -351,11 +357,11 @@ class Tag(object):
             self._write_as_string(item, out, indent)
 
     def _write_as_string(self, s, out, indent, escape_=True):
-        if isinstance(s, unicode):
+        if isinstance(s, unicode) and not isinstance(out, StringIOUnicode):
             s = s.encode('utf-8')
         elif s is None:
             s = ''
-        else:
+        elif not isinstance(s, basestring):
             s = str(s)
 
         if escape_:
@@ -382,10 +388,10 @@ class Tag(object):
             if callable(value):
                 value = value(context)
 
-            if isinstance(value, unicode):
+            if isinstance(value, unicode) and not isinstance(out, StringIOUnicode):
                 value = value.encode('utf-8')
 
-            if not isinstance(value, str):
+            if not isinstance(value, basestring):
                 value = str(value)
 
             value = escape(value, quote=True)
