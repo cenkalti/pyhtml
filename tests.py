@@ -209,6 +209,15 @@ class TestPyHTML(unittest.TestCase):
         expected = u'<title a="Türkçe"></title>'
         self.assertEqual(rendered.decode('utf-8'), expected)
 
+    def test_unicode_conversion(self):
+        # calling unicode(tag) on a tag with non-ascii content doesn't result
+        # in a UnicodeDecodeError. It directly renders unicode without encoding
+        # the string in the process.
+        t = title(a=u'Türkçe')(u'Türkçe')
+        rendered = unicode(t)
+        expected = u'<title a="Türkçe">Türkçe</title>'
+        self.assertEqual(rendered, expected)
+
     def test_self_closing_tag_init(self):
         t = hr(id=3)
         self.assertEqualWS(str(t), '<hr id="3"/>')
