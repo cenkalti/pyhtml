@@ -196,7 +196,7 @@ from cStringIO import StringIO
 from StringIO import StringIO as StringIOUnicode
 from types import GeneratorType
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 INDENT_SIZE = 2
 
