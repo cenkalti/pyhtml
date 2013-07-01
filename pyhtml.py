@@ -196,7 +196,7 @@ from cStringIO import StringIO
 from StringIO import StringIO as StringIOUnicode
 from types import GeneratorType
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 INDENT_SIZE = 2
 
@@ -237,6 +237,10 @@ class Tag(object):
     doctype = None
 
     def __init__(self, *children, **attributes):
+        _safe = attributes.pop('_safe', None)
+        if _safe is not None:
+            self.safe = _safe
+
         # Only children or attributes may be set at a time.
         assert ((bool(children) ^ bool(attributes))
                 or (not children and not attributes))
@@ -249,9 +253,13 @@ class Tag(object):
         self.attributes = self.default_attributes.copy()
         self.attributes.update(attributes)
 
-    def __call__(self, *children):
+    def __call__(self, *children, **options):
         if self.self_closing:
             raise Exception("Self closing tag can't have children")
+
+        _safe = options.pop('_safe', None)
+        if _safe is not None:
+            self.safe = _safe
 
         self.children = children
         return self
