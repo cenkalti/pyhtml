@@ -445,6 +445,21 @@ class Block(Tag):
         return _out.getvalue()
 
 
+class Safe(Block):
+    """Helper for wrapping content that do not need escaping."""
+
+    safe = True
+
+    def __init__(self, *children, **options):
+        super(Safe, self).__init__(None)
+        super(Safe, self).__call__(*children, **options)
+
+
+def Var(var):
+    """Helper function for printing a variable from context."""
+    return lambda ctx: ctx.get(var)
+
+
 class head(Tag): pass
 class body(Tag): pass
 class title(Tag): pass
@@ -543,21 +558,6 @@ class style(Tag):
 
 class form(Tag):
     default_attributes = {'method': 'POST'}
-
-
-def Var(var):
-    """Helper function for printing a variable from context."""
-    return lambda ctx: ctx.get(var)
-
-
-class Safe(Block):
-    """Helper for wrapping content that do not need escaping."""
-
-    safe = True
-
-    def __init__(self, *children, **options):
-        super(Safe, self).__init__(None)
-        super(Safe, self).__call__(*children, **options)
 
 
 if __name__ == "__main__":
