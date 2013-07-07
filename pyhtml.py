@@ -546,6 +546,7 @@ class form(Tag):
 
 
 def Var(var):
+    """Helper function for printing a variable from context."""
     return lambda ctx: ctx.get(var)
 
 
