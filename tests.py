@@ -167,6 +167,10 @@ class TestPyHTML(unittest.TestCase):
         x = div('<script>', _safe=True)
         self.assertIn('<script>', str(x))
 
+    def test_safe_wrapper(self):
+        x = div(Safe('<script></script>'))
+        self.assertEqual('<div><script></script></div>', str(x))
+
     def test_callable(self):
         tag = div(
             p(

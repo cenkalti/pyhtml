@@ -550,6 +550,16 @@ def Var(var):
     return lambda ctx: ctx.get(var)
 
 
+class Safe(Block):
+    """Helper for wrapping content that do not need escaping."""
+
+    safe = True
+
+    def __init__(self, *children, **options):
+        super(Safe, self).__init__(None)
+        super(Safe, self).__call__(*children, **options)
+
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
