@@ -545,7 +545,7 @@ class form(Tag):
     default_attributes = {'method': 'POST'}
 
 
-def var(var):
+def Var(var):
     return lambda ctx: ctx.get(var)
 
 
