@@ -324,6 +324,18 @@ qwerty</pre>
         x['b'] = 'asdf', 123
         self.assertEqual(str(x), """<div>asdf123</div>""")
 
+    def test_var(self):
+        ctx = {'name': 'value'}
+        x = div(Var('name'))
+        rendered = x.render(**ctx)
+        self.assertEqual(rendered, '<div>value</div>')
+
+    def test_var_default(self):
+        ctx = {'name': 'value'}
+        x = div(Var('notexist', 'default'))
+        rendered = x.render(**ctx)
+        self.assertEqual(rendered, '<div>default</div>')
+
 
 if __name__ == "__main__":
     unittest.main()

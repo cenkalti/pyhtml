@@ -455,9 +455,9 @@ class Safe(Block):
         super(Safe, self).__call__(*children, **options)
 
 
-def Var(var):
+def Var(var, default=None):
     """Helper function for printing a variable from context."""
-    return lambda ctx: ctx.get(var)
+    return lambda ctx: ctx.get(var, default)
 
 
 # These tags below are declared explicitly one by one to allow code
