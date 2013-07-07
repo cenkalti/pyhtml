@@ -460,6 +460,8 @@ def Var(var):
     return lambda ctx: ctx.get(var)
 
 
+# These tags below are declared explicitly one by one to allow code
+# completion tools to analyze the code staticly.
 class head(Tag): pass
 class body(Tag): pass
 class title(Tag): pass
