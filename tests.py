@@ -126,8 +126,8 @@ class TestPyHTML(unittest.TestCase):
         )
         _a = h._find_blocks('a')
         self.assertEqual(len(_a), 2)
-        self.assertIs(_a[0], a1)
-        self.assertIs(_a[1], a2)
+        self.assertTrue(_a[0] is a1)
+        self.assertTrue(_a[1] is a2)
         _b = h._find_blocks('b')
         self.assertEqual(_b[0], x)
 
@@ -157,15 +157,15 @@ class TestPyHTML(unittest.TestCase):
     def test_block_safe(self):
         x = div('<script>')
         x.safe = True
-        self.assertIn('<script>', str(x))
+        self.assertTrue('<script>' in str(x))
 
     def test_safe_in_attr(self):
         x = div(_safe=True)('<script>')
-        self.assertIn('<script>', str(x))
+        self.assertTrue('<script>' in str(x))
 
     def test_safe_in_content(self):
         x = div('<script>', _safe=True)
-        self.assertIn('<script>', str(x))
+        self.assertTrue('<script>' in str(x))
 
     def test_safe_wrapper(self):
         x = div(Safe('<script></script>'))
