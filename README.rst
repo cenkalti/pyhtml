@@ -92,7 +92,9 @@ The above code is rendered as:
 Installing
 ----------
 
-    pip install pyhtml
+.. code-block:: bash
+
+    $ pip install pyhtml
 
 or download pyhtml.py into your project directory. There are no hard dependencies other than the Python standard library. PyHTML is tested with Python 2.7 only.
 
