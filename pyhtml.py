@@ -43,8 +43,8 @@ Some tags are self closing.
 
 You can set attributes of the tag.
 
->>> print div(lang='tr', id='content')
-<div id="content" lang="tr"></div>
+>>> print div(lang='tr', id='content', class_="bar", data_value="foo")
+<div class="bar" data-value="foo" id="content" lang="tr"></div>
 
 
 You can set contents of the tag.
@@ -392,6 +392,10 @@ class Tag(object):
             # be postfixed with underscore by user.
             if key.endswith('_'):
                 key = key.rstrip('_')
+
+            # Enabling data attributes
+            if key.startswith('data_'):
+                key = key.replace('_', '-')
 
             if callable(value):
                 value = value(context)
