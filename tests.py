@@ -135,6 +135,14 @@ class TestPyHTML(unittest.TestCase):
         t = div(class_='container')
         self.assertEqual(str(t), '<div class="container"></div>')
 
+    def test_data_attributes(self):
+        t = div(data_value='bar')
+        self.assertEqual(str(t), '<div data-value="bar"></div>')
+
+    def test_data_attributes_part_2(self):
+        t = div(data_some_attribute_forever='bar')
+        self.assertEqual(str(t), '<div data-some-attribute-forever="bar"></div>')
+
     def test_copy(self):
         t = div(Block('a'))
         t2 = t.copy()
