@@ -19,14 +19,14 @@ Example
 .. code-block:: python
 
     from pyhtml import *
-    
-    
+
+
     def f_links(ctx):
         for title, page in [('Home', '/home.html'),
                             ('Login', '/login.html')]:
             yield li(a(href=page)(title))
-    
-    
+
+
     t = html(
         head(
             title('Awesome website'),
@@ -49,7 +49,7 @@ Example
             )
         )
     )
-    
+
     print t.render(user='Cenk')
 
 
