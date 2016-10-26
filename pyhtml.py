@@ -564,8 +564,3 @@ class style(Tag):
 
 class form(Tag):
     default_attributes = {'method': 'POST'}
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
