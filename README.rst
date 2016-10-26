@@ -1,6 +1,12 @@
 PyHTML
 ======
 
+.. image:: https://travis-ci.org/cenkalti/pyhtml.svg?branch=master
+   :target: https://travis-ci.org/cenkalti/pyhtml?branch=master
+
+.. image:: https://coveralls.io/repos/cenkalti/pyhtml/badge.svg?branch=master
+   :target: https://coveralls.io/r/cenkalti/pyhtml?branch=master
+
 PyHTML is a simple HTML generation library for Python.
 
 Inspired by `Flask-HTMLBuilder <http://majorz.github.com/flask-htmlbuilder/>`_
