@@ -1,0 +1,10 @@
+language: python
+python:
+  - 2.7
+install:
+  - pip install coveralls
+script:
+  - python pyhtml.py
+  - nosetests
+after_success:
+  - coveralls
