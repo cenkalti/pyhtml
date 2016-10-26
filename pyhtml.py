@@ -20,18 +20,16 @@ Tags can be rendered by converting to string.
 >>> str(t)
 '<div></div>'
 
+
 Printing an object automatically calls str() with that object.
 I will keep printing tags in this tutorial for clarity.
 
-
-You can put a content into tags.
->>> print div('content')
-<div>
-  content
-</div>
+>>> print div()
+<div></div>
 
 
 Parantheses can be omitted if the tag has no content.
+
 >>> print div
 <div></div>
 
@@ -41,18 +39,17 @@ Some tags are self closing.
 <hr/>
 
 
-You can set attributes of the tag.
-
->>> print div(lang='tr', id='content', class_="bar", data_value="foo")
-<div class="bar" data-value="foo" id="content" lang="tr"></div>
-
-
-You can set contents of the tag.
-
+You can put some content into the tag.
 >>> print div('content')
 <div>
   content
 </div>
+
+
+You can set attributes of the tag.
+
+>>> print div(lang='tr', id='content', class_="bar", data_value="foo")
+<div class="bar" data-value="foo" id="content" lang="tr"></div>
 
 
 Or both:
