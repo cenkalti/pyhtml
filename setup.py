@@ -23,7 +23,7 @@ setup(
     author=u'Cenk Altı',
     author_email='cenkalti@gmail.com',
     keywords='html template markup',
-    url='http://github.com/cenkalti/pyhtml',
+    url='https://github.com/cenkalti/pyhtml',
     py_modules=['pyhtml'],
     zip_safe=False,
     include_package_data=True,
