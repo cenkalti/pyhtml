@@ -190,16 +190,9 @@ from copy import deepcopy
 from types import GeneratorType
 
 try:
-    from cStringIO import StringIO
+    from StringIO import StringIO
 except ImportError:
     from io import StringIO
-
-try:
-    # Python-based StringIO is needed if we want to work with unicode strings.
-    # cStringIO only works with byte strings.
-    from StringIO import StringIO as StringIOUnicode
-except ImportError:
-    from io import StringIO as StringIOUnicode
 
 import six
 
@@ -233,9 +226,7 @@ class _TagMeta(type):
         return cls.__name__
 
 
-class Tag(object):
-
-    __metaclass__ = _TagMeta
+class Tag(six.with_metaclass(_TagMeta, object)):
 
     safe = False  # do not escape while rendering
     self_closing = False
@@ -284,7 +275,7 @@ class Tag(object):
             return "%s()" % self.name
 
     def _repr_attributes(self):
-        return ', '.join("%s=%r" % (key, value) for key, value in self.attributes.iteritems())
+        return ', '.join("%s=%r" % (key, value) for key, value in six.iteritems(self.attributes))
 
     def _repr_children(self):
         return ', '.join(repr(child) for child in self.children)
@@ -293,7 +284,7 @@ class Tag(object):
         return self.render()
 
     def __unicode__(self):
-        return self.render(_out=StringIOUnicode(u''))
+        return self.render(_out=StringIO(u''))
 
     @property
     def name(self):
@@ -346,17 +337,12 @@ class Tag(object):
         return _out.getvalue()
 
     def _write_list(self, l, out, context, indent=0):
-        for child in l:
-            self._write_item(child, out, context, indent)
-
+        for i, child in enumerate(l):
             # Write newline between items
-            if not self.whitespace_sensitive:
+            if i != 0 and not self.whitespace_sensitive:
                 out.write('\n')
-        else:
-            # Remove the last newline
-            if not self.whitespace_sensitive:
-                out.seek(-1, 1)
-                out.truncate()
+
+            self._write_item(child, out, context, indent)
 
     def _write_item(self, item, out, context, indent):
         if isinstance(item, Tag):
@@ -372,7 +358,7 @@ class Tag(object):
             self._write_as_string(item, out, indent)
 
     def _write_as_string(self, s, out, indent, escape_=True):
-        if isinstance(s, six.text_type) and not isinstance(out, StringIOUnicode):
+        if isinstance(s, six.text_type) and not isinstance(out, StringIO):
             s = s.encode('utf-8')
         elif s is None:
             s = ''
@@ -407,7 +393,7 @@ class Tag(object):
             if callable(value):
                 value = value(context)
 
-            if isinstance(value, six.text_type) and not isinstance(out, StringIOUnicode):
+            if isinstance(value, six.text_type) and not isinstance(out, StringIO):
                 value = value.encode('utf-8')
 
             if not isinstance(value, six.string_types):

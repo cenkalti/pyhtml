@@ -20,8 +20,10 @@ class TestPyHTML(unittest.TestCase):
         second = remove_whitespace(second)
         return super(TestPyHTML, self).assertEqual(first, second, msg)
 
-    def test_repr_tag(self):
+    def test_repr_empty_tag(self):
         self.assertEqualWS(repr(div), 'div')
+
+    def test_repr_tag(self):
         self.assertEqualWS(repr(div()), 'div()')
         self.assertEqualWS(repr(div(a=1)), 'div(a=1)')
         self.assertEqualWS(repr(div("asdf")), "div('asdf')")
@@ -223,13 +225,15 @@ class TestPyHTML(unittest.TestCase):
         t = title(u'Türkçe')
         rendered = t.render()
         expected = u'<title>Türkçe</title>'
-        self.assertEqual(rendered.decode('utf-8'), expected)
+        self.assertIsInstance(rendered, six.text_type)
+        self.assertEqual(rendered, expected)
 
     def test_unicode_attr_value(self):
         t = title(a=u'Türkçe')
         rendered = t.render()
         expected = u'<title a="Türkçe"></title>'
-        self.assertEqual(rendered.decode('utf-8'), expected)
+        self.assertIsInstance(rendered, six.text_type)
+        self.assertEqual(rendered, expected)
 
     def test_unicode_conversion(self):
         # calling unicode(tag) on a tag with non-ascii content doesn't result
