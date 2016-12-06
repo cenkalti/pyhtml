@@ -4,13 +4,36 @@ PyHTML
 .. image:: https://travis-ci.org/cenkalti/pyhtml.svg?branch=master
    :target: https://travis-ci.org/cenkalti/pyhtml?branch=master
 
-.. image:: https://coveralls.io/repos/cenkalti/pyhtml/badge.svg?branch=master
-   :target: https://coveralls.io/r/cenkalti/pyhtml?branch=master
+.. image:: https://coveralls.io/repos/github/cenkalti/pyhtml/badge.svg?branch=master
+   :target: https://coveralls.io/github/cenkalti/pyhtml?branch=master
 
 PyHTML is a simple HTML generation library for Python.
 
 Inspired by `Flask-HTMLBuilder <http://majorz.github.com/flask-htmlbuilder/>`_
 and `this gist <https://gist.github.com/3516334>`_.
+
+
+Features
+--------
+
+* Compatible with Python 2 and 3
+* Outputs beautifully indented code
+* Some tags have sensible defaults
+* Have Blocks for filling them later
+
+
+Installing
+----------
+
+.. code-block:: bash
+
+    $ pip install pyhtml
+
+
+Documentation
+-------------
+
+See the docstring on pyhtml.py file.
 
 
 Example
@@ -93,19 +116,3 @@ The above code is rendered as:
         </footer>
       </body>
     </html>
-
-
-Installing
-----------
-
-.. code-block:: bash
-
-    $ pip install pyhtml
-
-or download pyhtml.py into your project directory. There are no hard dependencies other than the Python standard library. PyHTML is tested with Python 2.7 only.
-
-
-Documentation
--------------
-
-See the docstring on pyhtml.py.
