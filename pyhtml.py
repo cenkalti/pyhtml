@@ -193,7 +193,7 @@ from types import GeneratorType
 
 import six
 
-__version__ = '0.6.0'
+__version__ = '0.7.0'
 
 # The list will be extended by register_all function.
 __all__ = 'Tag Block Safe Var SelfClosingTag html script style form'.split()
