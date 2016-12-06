@@ -25,6 +25,7 @@ setup(
     keywords='html template markup',
     url='https://github.com/cenkalti/pyhtml',
     py_modules=['pyhtml'],
+    install_requires=['six'],
     zip_safe=False,
     include_package_data=True,
     test_suite='tests',
