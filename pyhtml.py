@@ -186,37 +186,47 @@ Full example:
 
 """
 
+import sys
+
 from copy import deepcopy
 from types import GeneratorType
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 
 import six
 
 __version__ = '0.6.0'
 
-INDENT_SIZE = 2
+# The list will be extended by register_all function.
+__all__ = 'Tag Block Safe Var SelfClosingTag html script style form'.split()
+
+tags = 'head body title div p h1 h2 h3 h4 h5 h6 u b i s a em strong span '\
+        'font del_ ins ul ol li dd dt dl article section nav aside header '\
+        'footer audio video object_ embed param fieldset legend button '\
+        'textarea label select option table thread tbody tr th td caption '\
+        'blockquote cite q abbr acronym address'
+
+self_closing_tags = 'meta link br hr input img'
+
+whitespace_sensitive_tags = 'code samp pre var kbd dfn'
+
+INDENT = 2
 
 
 def _escape(text):
     r = (
-            ('&', '&amp;'),
-            ('<', '&lt;'),
-            ('>', '&gt;'),
-            ('"', '&quot;'),
-            ("'", '&#x27;'),
-    )
+        ('&', '&amp;'),
+        ('<', '&lt;'),
+        ('>', '&gt;'),
+        ('"', '&quot;'),
+        ("'", '&#x27;'), )
     for k, v in r:
         text = text.replace(k, v)
     return text
 
 
-class _TagMeta(type):
+class TagMeta(type):
     """Type of the Tag. (type(Tag) == TagMeta)
     """
+
     def __str__(cls):
         """Renders as empty tag."""
         if cls.self_closing:
@@ -228,7 +238,8 @@ class _TagMeta(type):
         return cls.__name__
 
 
-class Tag(six.with_metaclass(_TagMeta, object)):
+@six.python_2_unicode_compatible
+class Tag(six.with_metaclass(TagMeta, object)):
 
     safe = False  # do not escape while rendering
     self_closing = False
@@ -242,8 +253,8 @@ class Tag(six.with_metaclass(_TagMeta, object)):
             self.safe = _safe
 
         # Only children or attributes may be set at a time.
-        assert ((bool(children) ^ bool(attributes))
-                or (not children and not attributes))
+        assert ((bool(children) ^ bool(attributes)) or
+                (not children and not attributes))
 
         if self.self_closing and children:
             raise Exception("Self closing tag can't have children")
@@ -270,23 +281,20 @@ class Tag(six.with_metaclass(_TagMeta, object)):
         elif self.children and not self.attributes:
             return "%s(%s)" % (self.name, self._repr_children())
         elif self.attributes and self.children:
-            return "%s(%s)(%s)" % (self.name,
-                                   self._repr_attributes(),
+            return "%s(%s)(%s)" % (self.name, self._repr_attributes(),
                                    self._repr_children())
         else:
             return "%s()" % self.name
 
     def _repr_attributes(self):
-        return ', '.join("%s=%r" % (key, value) for key, value in six.iteritems(self.attributes))
+        return ', '.join("%s=%r" % (key, value)
+                         for key, value in six.iteritems(self.attributes))
 
     def _repr_children(self):
         return ', '.join(repr(child) for child in self.children)
 
     def __str__(self):
         return self.render()
-
-    def __unicode__(self):
-        return self.render(_out=StringIO(u''))
 
     @property
     def name(self):
@@ -297,7 +305,7 @@ class Tag(six.with_metaclass(_TagMeta, object)):
 
     def render(self, _out=None, _indent=0, **context):
         if _out is None:
-            _out = StringIO()
+            _out = six.StringIO(u'')
 
         # Write doctype
         if self.doctype:
@@ -325,7 +333,8 @@ class Tag(six.with_metaclass(_TagMeta, object)):
                     _out.write('\n')
 
                 # Write content
-                self._write_list(self.children, _out, context, _indent + 2)
+                self._write_list(self.children, _out, context,
+                                 _indent + INDENT)
 
                 if not self.whitespace_sensitive:
                     # Newline after content
@@ -349,7 +358,7 @@ class Tag(six.with_metaclass(_TagMeta, object)):
     def _write_item(self, item, out, context, indent):
         if isinstance(item, Tag):
             item.render(out, indent, **context)
-        elif isinstance(item, _TagMeta):
+        elif isinstance(item, TagMeta):
             self._write_as_string(item, out, indent, escape=False)
         elif callable(item):
             rv = item(context)
@@ -360,7 +369,7 @@ class Tag(six.with_metaclass(_TagMeta, object)):
             self._write_as_string(item, out, indent)
 
     def _write_as_string(self, s, out, indent, escape=True):
-        if isinstance(s, six.text_type) and not isinstance(out, StringIO):
+        if isinstance(s, six.text_type) and not isinstance(out, six.StringIO):
             s = s.encode('utf-8')
         elif s is None:
             s = ''
@@ -395,7 +404,8 @@ class Tag(six.with_metaclass(_TagMeta, object)):
             if callable(value):
                 value = value(context)
 
-            if isinstance(value, six.text_type) and not isinstance(out, StringIO):
+            if isinstance(value, six.text_type) and not isinstance(
+                    out, six.StringIO):
                 value = value.encode('utf-8')
 
             if not isinstance(value, six.string_types):
@@ -438,7 +448,7 @@ class Block(Tag):
 
     def render(self, _out=None, _indent=0, **context):
         if _out is None:
-            _out = StringIO()
+            _out = six.StringIO(u'')
 
         self._write_list(self.children, _out, context, _indent)
         return _out.getvalue()
@@ -459,89 +469,12 @@ def Var(var, default=None):
     return lambda ctx: ctx.get(var, default)
 
 
-# These tags below are declared explicitly one by one to allow code
-# completion tools to analyze the code staticly.
-class head(Tag): pass
-class body(Tag): pass
-class title(Tag): pass
-class div(Tag): pass
-class p(Tag): pass
-class h1(Tag): pass
-class h2(Tag): pass
-class h3(Tag): pass
-class h4(Tag): pass
-class h5(Tag): pass
-class h6(Tag): pass
-class u(Tag): pass
-class b(Tag): pass
-class i(Tag): pass
-class s(Tag): pass
-class a(Tag): pass
-class em(Tag): pass
-class strong(Tag): pass
-class span(Tag): pass
-class font(Tag): pass
-class del_(Tag): pass
-class ins(Tag): pass
-class ul(Tag): pass
-class ol(Tag): pass
-class li(Tag): pass
-class dd(Tag): pass
-class dt(Tag): pass
-class dl(Tag): pass
-class article(Tag): pass
-class section(Tag): pass
-class nav(Tag): pass
-class aside(Tag): pass
-class header(Tag): pass
-class footer(Tag): pass
-class audio(Tag): pass
-class video(Tag): pass
-class object_(Tag): pass
-class embed(Tag): pass
-class param(Tag): pass
-class fieldset(Tag): pass
-class legend(Tag): pass
-class button(Tag): pass
-class textarea(Tag): pass
-class label(Tag): pass
-class select(Tag): pass
-class option(Tag): pass
-class table(Tag): pass
-class thead(Tag): pass
-class tbody(Tag): pass
-class tr(Tag): pass
-class th(Tag): pass
-class td(Tag): pass
-class caption(Tag): pass
-class blockquote(Tag): pass
-class cite(Tag): pass
-class q(Tag): pass
-class abbr(Tag): pass
-class acronym(Tag): pass
-class address(Tag): pass
-
-
 class SelfClosingTag(Tag):
     self_closing = True
-
-class meta(SelfClosingTag): pass
-class link(SelfClosingTag): pass
-class br(SelfClosingTag): pass
-class hr(SelfClosingTag): pass
-class input(SelfClosingTag): pass
-class img(SelfClosingTag): pass
 
 
 class WhitespaceSensitiveTag(Tag):
     whitespace_sensitive = True
-
-class code(WhitespaceSensitiveTag): pass
-class samp(WhitespaceSensitiveTag): pass
-class pre(WhitespaceSensitiveTag): pass
-class var(WhitespaceSensitiveTag): pass
-class kbd(WhitespaceSensitiveTag): pass
-class dfn(WhitespaceSensitiveTag): pass
 
 
 class html(Tag):
@@ -559,3 +492,17 @@ class style(Tag):
 
 class form(Tag):
     default_attributes = {'method': 'POST'}
+
+
+_M = sys.modules[__name__]
+
+
+def register_all(tags, parent):
+    for tag in tags.split():
+        __all__.append(tag)
+        setattr(_M, tag, type(tag, (parent, ), {'name': tag}))
+
+
+register_all(tags, Tag)
+register_all(self_closing_tags, SelfClosingTag)
+register_all(whitespace_sensitive_tags, WhitespaceSensitiveTag)
