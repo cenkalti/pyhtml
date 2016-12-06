@@ -2,6 +2,8 @@
 import unittest
 from pyhtml import *
 
+import six
+
 
 class TestPyHTML(unittest.TestCase):
 
@@ -10,7 +12,7 @@ class TestPyHTML(unittest.TestCase):
     def assertEqual(self, first, second, msg=None):
         """Overriden for ignoring whitespace."""
         def remove_whitespace(s):
-            if isinstance(s, basestring):
+            if isinstance(s, six.string_types):
                 return s.replace(' ', '').replace('\n', '')
             else:
                 return s
@@ -234,7 +236,7 @@ class TestPyHTML(unittest.TestCase):
         # in a UnicodeDecodeError. It directly renders unicode without encoding
         # the string in the process.
         t = title(a=u'Türkçe')(u'Türkçe')
-        rendered = unicode(t)
+        rendered = six.text_type(t)
         expected = u'<title a="Türkçe">Türkçe</title>'
         self.assertEqual(rendered, expected)
 

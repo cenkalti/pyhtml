@@ -187,11 +187,21 @@ Full example:
 """
 
 from copy import deepcopy
-from cStringIO import StringIO
-# Python-based StringIO is needed if we want to work with unicode strings.
-# cStringIO only works with byte strings.
-from StringIO import StringIO as StringIOUnicode
 from types import GeneratorType
+
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+try:
+    # Python-based StringIO is needed if we want to work with unicode strings.
+    # cStringIO only works with byte strings.
+    from StringIO import StringIO as StringIOUnicode
+except ImportError:
+    from io import StringIO as StringIOUnicode
+
+import six
 
 __version__ = '0.5.0'
 
@@ -362,11 +372,11 @@ class Tag(object):
             self._write_as_string(item, out, indent)
 
     def _write_as_string(self, s, out, indent, escape_=True):
-        if isinstance(s, unicode) and not isinstance(out, StringIOUnicode):
+        if isinstance(s, six.text_type) and not isinstance(out, StringIOUnicode):
             s = s.encode('utf-8')
         elif s is None:
             s = ''
-        elif not isinstance(s, basestring):
+        elif not isinstance(s, six.string_types):
             s = str(s)
 
         if escape_:
@@ -397,10 +407,10 @@ class Tag(object):
             if callable(value):
                 value = value(context)
 
-            if isinstance(value, unicode) and not isinstance(out, StringIOUnicode):
+            if isinstance(value, six.text_type) and not isinstance(out, StringIOUnicode):
                 value = value.encode('utf-8')
 
-            if not isinstance(value, basestring):
+            if not isinstance(value, six.string_types):
                 value = str(value)
 
             value = escape(value, quote=True)
