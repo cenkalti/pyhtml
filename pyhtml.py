@@ -201,14 +201,16 @@ __version__ = '0.5.0'
 INDENT_SIZE = 2
 
 
-def escape(text, quote=False):
-    for k, v in ('&', '&amp;'), ('<', '&lt;'), ('>', '&gt;'):
+def _escape(text):
+    r = (
+            ('&', '&amp;'),
+            ('<', '&lt;'),
+            ('>', '&gt;'),
+            ('"', '&quot;'),
+            ("'", '&#x27;'),
+    )
+    for k, v in r:
         text = text.replace(k, v)
-
-    if quote:
-        for k, v in ('"', '&quot;'), ("'", '&#x27;'):
-            text = text.replace(k, v)
-
     return text
 
 
@@ -348,7 +350,7 @@ class Tag(six.with_metaclass(_TagMeta, object)):
         if isinstance(item, Tag):
             item.render(out, indent, **context)
         elif isinstance(item, _TagMeta):
-            self._write_as_string(item, out, indent, escape_=False)
+            self._write_as_string(item, out, indent, escape=False)
         elif callable(item):
             rv = item(context)
             self._write_item(rv, out, context, indent)
@@ -357,7 +359,7 @@ class Tag(six.with_metaclass(_TagMeta, object)):
         else:
             self._write_as_string(item, out, indent)
 
-    def _write_as_string(self, s, out, indent, escape_=True):
+    def _write_as_string(self, s, out, indent, escape=True):
         if isinstance(s, six.text_type) and not isinstance(out, StringIO):
             s = s.encode('utf-8')
         elif s is None:
@@ -365,9 +367,9 @@ class Tag(six.with_metaclass(_TagMeta, object)):
         elif not isinstance(s, six.string_types):
             s = str(s)
 
-        if escape_:
+        if escape:
             if not self.safe:
-                s = escape(s)
+                s = _escape(s)
 
         # Write content
         if not self.whitespace_sensitive:
@@ -399,7 +401,7 @@ class Tag(six.with_metaclass(_TagMeta, object)):
             if not isinstance(value, six.string_types):
                 value = str(value)
 
-            value = escape(value, quote=True)
+            value = _escape(value)
 
             out.write(' %s="%s"' % (key, value))
 
