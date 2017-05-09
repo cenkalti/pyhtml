@@ -204,7 +204,7 @@ tags = 'head body title div p h1 h2 h3 h4 h5 h6 u b i s a em strong span '\
         'textarea label select option table thread tbody tr th td caption '\
         'blockquote cite q abbr acronym address'
 
-self_closing_tags = 'meta link br hr input img'
+self_closing_tags = 'meta link br hr input_ img'
 
 whitespace_sensitive_tags = 'code samp pre var kbd dfn'
 
