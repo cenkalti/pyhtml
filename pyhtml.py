@@ -298,7 +298,7 @@ class Tag(six.with_metaclass(TagMeta, object)):
 
     @property
     def name(self):
-        return self.__class__.__name__
+        return self.__class__.__name__.rstrip('_')
 
     def copy(self):
         return deepcopy(self)
