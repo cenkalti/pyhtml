@@ -397,9 +397,8 @@ class Tag(six.with_metaclass(TagMeta, object)):
             if key.endswith('_'):
                 key = key.rstrip('_')
 
-            # Enabling data attributes
-            if key.startswith('data_'):
-                key = key.replace('_', '-')
+            # Dash is preffered to underscore in attribute names.
+            key = key.replace('_', '-')
 
             if callable(value):
                 value = value(context)
