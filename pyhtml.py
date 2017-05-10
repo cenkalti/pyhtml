@@ -317,7 +317,7 @@ class Tag(six.with_metaclass(TagMeta, object)):
         _out.write(' ' * _indent)
 
         # Open tag
-        _out.write('<%s' % self.name)
+        _out.write('<%s' % self.name.rstrip('_'))
 
         self._write_attributes(_out, context)
 
@@ -343,7 +343,7 @@ class Tag(six.with_metaclass(TagMeta, object)):
                     _out.write(' ' * _indent)
 
             # Write closing tag
-            _out.write('</%s>' % self.name)
+            _out.write('</%s>' % self.name.rstrip('_'))
 
         return _out.getvalue()
 
