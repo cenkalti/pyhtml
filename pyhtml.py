@@ -499,7 +499,7 @@ _M = sys.modules[__name__]
 def register_all(tags, parent):
     for tag in tags.split():
         __all__.append(tag)
-        setattr(_M, tag, type(tag, (parent, ), {'name': tag}))
+        setattr(_M, tag, type(tag, (parent, ), {'name': tag.rstrip('_')}))
 
 
 register_all(tags, Tag)

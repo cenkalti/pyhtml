@@ -147,6 +147,10 @@ class TestPyHTML(unittest.TestCase):
         t = div(data_some_attribute_forever='bar')
         self.assertEqual(str(t), '<div data-some-attribute-forever="bar"></div>')
 
+    def test_aria_attributes(self):
+        t = div(aria_foo='bar')
+        self.assertEqual(str(t), '<div aria-foo="bar"></div>')
+
     def test_copy(self):
         t = div(Block('a'))
         t2 = t.copy()
@@ -349,6 +353,10 @@ qwerty</pre>
         x = div(Var('notexist', 'default'))
         rendered = x.render(**ctx)
         self.assertEqual(rendered, '<div>default</div>')
+
+    def test_underscore_to_dash_translation(self):
+        t = input_(value="foo")
+        self.assertEqual(str(t), '<input value="foo"/>')
 
 
 if __name__ == "__main__":
