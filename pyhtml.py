@@ -24,23 +24,23 @@ Tags can be rendered by converting to string.
 Printing an object automatically calls str() with that object.
 I will keep printing tags in this tutorial for clarity.
 
->>> print div()
+>>> print(div())
 <div></div>
 
 
 Parantheses can be omitted if the tag has no content.
 
->>> print div
+>>> print(div)
 <div></div>
 
 
 Some tags are self closing.
->>> print hr
+>>> print(hr)
 <hr/>
 
 
 You can put some content into the tag.
->>> print div('content')
+>>> print(div('content'))
 <div>
   content
 </div>
@@ -48,13 +48,13 @@ You can put some content into the tag.
 
 You can set attributes of the tag.
 
->>> print div(lang='tr', id='content', class_="bar", data_value="foo")
+>>> print(div(lang='tr', id='content', class_="bar", data_value="foo"))
 <div class="bar" data-value="foo" id="content" lang="tr"></div>
 
 
 Or both:
 
->>> print div(lang='tr')('content')
+>>> print(div(lang='tr')('content'))
 <div lang="tr">
   content
 </div>
@@ -67,11 +67,11 @@ If content is a callable, it will be called with a one argument
 
 >>> greet = lambda ctx: 'Hello %s' % ctx.get('user', 'guest')
 >>> greeting = div(greet)
->>> print greeting
+>>> print(greeting)
 <div>
   Hello guest
 </div>
->>> print greeting.render(user='Cenk')
+>>> print(greeting.render(user='Cenk'))
 <div>
   Hello Cenk
 </div>
@@ -79,7 +79,7 @@ If content is a callable, it will be called with a one argument
 
 You can give list of items as content.
 
->>> print div(nav(), greet, hr)
+>>> print(div(nav(), greet, hr))
 <div>
   <nav></nav>
   Hello guest
@@ -90,7 +90,7 @@ You can give list of items as content.
 You can give give a callable returning a list as content.
 
 >>> items = lambda ctx: [li('a'), li('b')]
->>> print ul(items)
+>>> print(ul(items))
 <ul>
   <li>
     a
@@ -106,7 +106,7 @@ You can give give a generator as content.
 >>> def items(ctx):
 ...    for i in range(3):
 ...        yield li(i)
->>> print ul(items)
+>>> print(ul(items))
 <ul>
   <li>
     0
@@ -122,7 +122,7 @@ You can give give a generator as content.
 
 You can nest tags.
 
->>> print div(div(p('a paragraph')))
+>>> print(div(div(p('a paragraph'))))
 <div>
   <div>
     <p>
@@ -134,17 +134,17 @@ You can nest tags.
 
 Some tags have sensible defaults.
 
->>> print form()
+>>> print(form())
 <form method="POST"></form>
 
->>> print html()
+>>> print(html())
 <!DOCTYPE html>
 <html></html>
 
 
 Full example:
 
->>> print html(
+>>> print(html(
 ...     head(
 ...         title('Awesome website'),
 ...         script(src="http://path.to/script.js")
@@ -161,7 +161,7 @@ Full example:
 ...             'Copyright 2012'
 ...         )
 ...     )
-... )
+... ))
 <!DOCTYPE html>
 <html>
   <head>
@@ -186,6 +186,7 @@ Full example:
 
 """
 
+from __future__ import print_function
 import sys
 
 from copy import deepcopy
@@ -505,3 +506,8 @@ def register_all(tags, parent):
 register_all(tags, Tag)
 register_all(self_closing_tags, SelfClosingTag)
 register_all(whitespace_sensitive_tags, WhitespaceSensitiveTag)
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod(extraglobs={'print_function' : print_function})
