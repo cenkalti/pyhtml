@@ -120,20 +120,33 @@ class TestPyHTML(unittest.TestCase):
 
     def test_find_blocks(self):
         a1 = Block('a')
-        a2 = Block('a')
+        a2 = Block('a')  # overrides the previous block with the same name
         x = Block('b')
         h = html(
             head(
-                title(Block('title'))
+                title('title')
             ),
             body(a1, a2, x)
         )
-        _a = h._find_blocks('a')
-        self.assertEqual(len(_a), 2)
-        self.assertTrue(_a[0] is a1)
-        self.assertTrue(_a[1] is a2)
-        _b = h._find_blocks('b')
-        self.assertEqual(_b[0], x)
+        assert h.blocks == {'a': a2, 'b': x}
+
+    def test_override_block(self):
+        h = html(
+            body(Block('main')),
+        )
+        t = h.copy()
+        t['main'] = div('foo', Block('main'))
+        t['main'] = 'bar'
+
+        assert 'foo' in str(t)
+        assert 'bar' in str(t)
+
+    def test_override_block_placeholder(self):
+        t = html(
+            body(Block('main')('foo'))
+        )
+        t['main'] = Block('main')('bar')
+        assert 'bar' in str(t)
 
     def test_reserved_keywords(self):
         t = div(class_='container')

@@ -262,6 +262,9 @@ class Tag(six.with_metaclass(TagMeta, object)):
 
         self.children = children
 
+        self.blocks = {}
+        self._set_blocks(children)
+
         self.attributes = self.default_attributes.copy()
         self.attributes.update(attributes)
 
@@ -416,21 +419,15 @@ class Tag(six.with_metaclass(TagMeta, object)):
             out.write(' %s="%s"' % (key, value))
 
     def __setitem__(self, block_name, *children):
-        """Fill all the Blocks with same block_name
-        in this tag recursively.
-        """
-        blocks = self._find_blocks(block_name)
-        for b in blocks:
-            b(*children)
+        self.blocks[block_name](*children)
+        self._set_blocks(children)
 
-    def _find_blocks(self, block_name):
-        blocks = []
-        for i, c in enumerate(self.children):
-            if isinstance(c, Block) and c.block_name == block_name:
-                blocks.append(c)
-            elif isinstance(c, Tag):
-                blocks += c._find_blocks(block_name)
-        return blocks
+    def _set_blocks(self, children):
+        for child in children:
+            if isinstance(child, Block):
+                self.blocks[child.block_name] = child
+            elif isinstance(child, Tag):
+                self.blocks.update(child.blocks)
 
 
 class Block(Tag):
