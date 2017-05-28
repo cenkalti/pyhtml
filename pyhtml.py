@@ -188,11 +188,12 @@ Full example:
 
 from __future__ import print_function
 import sys
-from typing import Dict  # noqa
 from copy import deepcopy
 from types import GeneratorType
-
 import six
+
+if sys.version_info[0] >= 3:
+    from typing import Dict  # noqa
 
 __version__ = '1.2.0'
 
