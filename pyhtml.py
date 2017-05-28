@@ -188,7 +188,7 @@ Full example:
 
 from __future__ import print_function
 import sys
-
+from typing import Dict  # noqa
 from copy import deepcopy
 from types import GeneratorType
 
@@ -200,10 +200,10 @@ __version__ = '1.1.2'
 __all__ = 'Tag Block Safe Var SelfClosingTag html script style form'.split()
 
 tags = 'head body title div p h1 h2 h3 h4 h5 h6 u b i s a em strong span '\
-        'font del_ ins ul ol li dd dt dl article section nav aside header '\
-        'footer audio video object_ embed param fieldset legend button '\
-        'textarea label select option table thead tbody tr th td caption '\
-        'blockquote cite q abbr acronym address'
+       'font del_ ins ul ol li dd dt dl article section nav aside header '\
+       'footer audio video object_ embed param fieldset legend button '\
+       'textarea label select option table thead tbody tr th td caption '\
+       'blockquote cite q abbr acronym address'
 
 self_closing_tags = 'meta link br hr input_ img'
 
@@ -240,13 +240,13 @@ class TagMeta(type):
 
 
 @six.python_2_unicode_compatible
-class Tag(six.with_metaclass(TagMeta, object)):
+class Tag(six.with_metaclass(TagMeta, object)):  # type: ignore
 
     safe = False  # do not escape while rendering
     self_closing = False
     whitespace_sensitive = False
-    default_attributes = {}
-    doctype = None
+    default_attributes = {}  # type: Dict[str, str]
+    doctype = None  # type: str
 
     def __init__(self, *children, **attributes):
         _safe = attributes.pop('_safe', None)
@@ -507,4 +507,4 @@ register_all(whitespace_sensitive_tags, WhitespaceSensitiveTag)
 
 if __name__ == "__main__":
     import doctest
-    doctest.testmod(extraglobs={'print_function': print_function})
+    doctest.testmod(extraglobs={'print_function': print_function})  # type: ignore
