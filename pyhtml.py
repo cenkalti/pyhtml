@@ -433,6 +433,7 @@ class Block(Tag):
     """List of renderable items."""
 
     def __init__(self, name):
+        super(Block, self).__init__()
         self.block_name = name
         self.children = ()
 

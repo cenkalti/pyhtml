@@ -141,6 +141,21 @@ class TestPyHTML(unittest.TestCase):
         assert 'foo' in str(t)
         assert 'bar' in str(t)
 
+    def test_override_block2(self):
+        t = html(
+            body(
+                div(
+                    Block('main'),
+                ),
+            ),
+        )
+        t2 = t.copy()
+        t2['main'] = div(
+            Block('main'),
+        )
+        t2['main'] = 'foo'
+        assert 'foo' in str(t2)
+
     def test_override_block_placeholder(self):
         t = html(
             body(Block('main')('foo'))
