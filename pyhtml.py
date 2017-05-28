@@ -277,6 +277,7 @@ class Tag(six.with_metaclass(TagMeta, object)):  # type: ignore
             self.safe = _safe
 
         self.children = children
+        self._set_blocks(children)
         return self
 
     def __repr__(self):
