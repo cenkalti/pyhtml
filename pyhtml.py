@@ -510,4 +510,4 @@ register_all(whitespace_sensitive_tags, WhitespaceSensitiveTag)
 
 if __name__ == "__main__":
     import doctest
-    doctest.testmod(extraglobs={'print_function' : print_function})
+    doctest.testmod(extraglobs={'print_function': print_function})
