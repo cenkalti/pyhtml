@@ -379,9 +379,8 @@ class Tag(six.with_metaclass(TagMeta, object)):  # type: ignore
         elif not isinstance(s, six.string_types):
             s = str(s)
 
-        if escape:
-            if not self.safe:
-                s = _escape(s)
+        if escape and not self.safe:
+            s = _escape(s)
 
         # Write content
         if not self.whitespace_sensitive:
