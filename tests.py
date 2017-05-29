@@ -120,15 +120,14 @@ class TestPyHTML(unittest.TestCase):
 
     def test_find_blocks(self):
         a1 = Block('a')
-        a2 = Block('a')  # overrides the previous block with the same name
-        x = Block('b')
+        b1 = Block('title')
         h = html(
             head(
-                title('title')
+                title(b1)
             ),
-            body(a1, a2, x)
+            body(a1)
         )
-        assert h.blocks == {'a': a2, 'b': x}
+        assert h.blocks == {'a': [a1], 'title': [b1]}
 
     def test_override_block(self):
         h = html(
@@ -155,6 +154,11 @@ class TestPyHTML(unittest.TestCase):
         )
         t2['main'] = 'foo'
         assert 'foo' in str(t2)
+
+    def test_multiple_blocks_with_same_name(self):
+        t = div(Block('foo'), Block('foo'))
+        t['foo'] = 'bar'
+        self.assertEqual(str(t), '<div>barbar</div>')
 
     def test_override_block_placeholder(self):
         t = html(

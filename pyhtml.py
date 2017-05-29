@@ -193,7 +193,7 @@ from types import GeneratorType
 import six
 
 if sys.version_info[0] >= 3:
-    from typing import Dict  # noqa
+    from typing import Dict, List  # noqa
 
 __version__ = '1.2.3'
 
@@ -262,7 +262,7 @@ class Tag(six.with_metaclass(TagMeta, object)):  # type: ignore
 
         self.children = children
 
-        self.blocks = {}
+        self.blocks = {}  # type: Dict[str, List[Block]]
         self._set_blocks(children)
 
         self.attributes = self.default_attributes.copy()
@@ -417,15 +417,23 @@ class Tag(six.with_metaclass(TagMeta, object)):  # type: ignore
             out.write(' %s="%s"' % (key, value))
 
     def __setitem__(self, block_name, *children):
-        self.blocks[block_name](*children)
-        self._set_blocks(children)
+        for block in self.blocks[block_name]:
+            block(*children)
 
-    def _set_blocks(self, children):
+        self._set_blocks(children, override=True)
+
+    def _set_blocks(self, children, override=False):
         for child in children:
             if isinstance(child, Block):
-                self.blocks[child.block_name] = child
+                if child.block_name not in self.blocks:
+                    self.blocks[child.block_name] = []
+                self.blocks[child.block_name].append(child)
             elif isinstance(child, Tag):
-                self.blocks.update(child.blocks)
+                for blocks in child.blocks.values():
+                    if override:
+                        self.blocks.update(child.blocks)
+                    else:
+                        self._set_blocks(blocks)
 
 
 class Block(Tag):
