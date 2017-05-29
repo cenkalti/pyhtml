@@ -195,7 +195,7 @@ import six
 if sys.version_info[0] >= 3:
     from typing import Dict, List  # noqa
 
-__version__ = '1.2.3'
+__version__ = '1.3.0'
 
 # The list will be extended by register_all function.
 __all__ = 'Tag Block Safe Var SelfClosingTag html script style form'.split()
