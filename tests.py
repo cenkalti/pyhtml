@@ -136,9 +136,7 @@ class TestPyHTML(unittest.TestCase):
         t = h.copy()
         t['main'] = div('foo', Block('main'))
         t['main'] = 'bar'
-
-        assert 'foo' in str(t)
-        assert 'bar' in str(t)
+        self.assertEqual(str(t), '<!DOCTYPE html><html><body><div>foobar</div></body></html>')
 
     def test_override_block2(self):
         t = html(
@@ -159,6 +157,16 @@ class TestPyHTML(unittest.TestCase):
         t = div(Block('foo'), Block('foo'))
         t['foo'] = 'bar'
         self.assertEqual(str(t), '<div>barbar</div>')
+
+    def test_multiple_blocks_with_same_name2(self):
+        t = html(head(title(Block('title'))), body(Block('main')))
+        t2 = t.copy()
+        t2['main'] = div(h2(Block('title')), Block('main'))
+        t3 = t2.copy()
+        t3['title'] = 'foo'
+        t3['main'] = 'bar'
+        self.assertEqual(str(t3), '<!DOCTYPE html><html><head><title>foo</title></head>'
+                                  '<body><div><h2>foo</h2>bar</div></body></html>')
 
     def test_override_block_placeholder(self):
         t = html(

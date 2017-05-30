@@ -420,20 +420,19 @@ class Tag(six.with_metaclass(TagMeta, object)):  # type: ignore
         for block in self.blocks[block_name]:
             block(*children)
 
-        self._set_blocks(children, override=True)
+        self._set_blocks(children, block_name=block_name)
 
-    def _set_blocks(self, children, override=False):
+    def _set_blocks(self, children, block_name=None):
         for child in children:
             if isinstance(child, Block):
-                if child.block_name not in self.blocks:
+                if child.block_name == block_name:
+                    self.blocks[child.block_name] = [child]
+                elif child.block_name not in self.blocks:
                     self.blocks[child.block_name] = []
                 self.blocks[child.block_name].append(child)
             elif isinstance(child, Tag):
                 for blocks in child.blocks.values():
-                    if override:
-                        self.blocks.update(child.blocks)
-                    else:
-                        self._set_blocks(blocks)
+                    self._set_blocks(blocks, block_name=block_name)
 
 
 class Block(Tag):
