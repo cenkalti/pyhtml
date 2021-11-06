@@ -28,7 +28,7 @@ I will keep printing tags in this tutorial for clarity.
 <div></div>
 
 
-Parantheses can be omitted if the tag has no content.
+Parentheses can be omitted if the tag has no content.
 
 >>> print(div)
 <div></div>
@@ -187,9 +187,11 @@ Full example:
 """
 
 from __future__ import print_function
+
 import sys
 from copy import deepcopy
 from types import GeneratorType
+
 import six
 
 if sys.version_info[0] >= 3:
@@ -399,7 +401,7 @@ class Tag(six.with_metaclass(TagMeta, object)):  # type: ignore
             if key.endswith('_'):
                 key = key.rstrip('_')
 
-            # Dash is preffered to underscore in attribute names.
+            # Dash is preferred to underscore in attribute names.
             key = key.replace('_', '-')
 
             if callable(value):
