@@ -1,8 +1,9 @@
 # -*- coding: utf8 -*-
 import unittest
-from pyhtml import *
 
 import six
+
+from pyhtml import *
 
 
 class TestPyHTML(unittest.TestCase):
@@ -10,7 +11,7 @@ class TestPyHTML(unittest.TestCase):
     assertEqualWS = unittest.TestCase.assertEqual
 
     def assertEqual(self, first, second, msg=None):
-        """Overriden for ignoring whitespace."""
+        """Overridden for ignoring whitespace."""
         def remove_whitespace(s):
             if isinstance(s, six.string_types):
                 return s.replace(' ', '').replace('\n', '')

@@ -5,7 +5,10 @@
 """
 import sys
 from timeit import Timer
+
 from jinja2 import Environment as JinjaEnvironment
+
+from pyhtml import *
 
 context = {
     'page_title': 'mitsuhiko\'s benchmark',
@@ -66,7 +69,6 @@ def f_table(ctx):
         td(cell) for cell in row
     ) for row in ctx['table'])
 
-from pyhtml import *
 pyhtml_template = html(
     head(
         title(var('page_title'))
