@@ -73,7 +73,7 @@ Example
         )
     )
 
-    print t.render(user='Cenk')
+    print(t.render(user='Cenk'))
 
 
 The above code is rendered as:
@@ -116,3 +116,9 @@ The above code is rendered as:
         </footer>
       </body>
     </html>
+
+
+Related projects
+----------------
+
+* https://github.com/COMP1010UNSW/pyhtml-enhanced
