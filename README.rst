@@ -1,9 +1,6 @@
 PyHTML
 ======
 
-.. image:: https://travis-ci.org/cenkalti/pyhtml.svg?branch=master
-   :target: https://travis-ci.org/cenkalti/pyhtml?branch=master
-
 .. image:: https://coveralls.io/repos/github/cenkalti/pyhtml/badge.svg?branch=master
    :target: https://coveralls.io/github/cenkalti/pyhtml?branch=master
 
