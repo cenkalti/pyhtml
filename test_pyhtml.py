@@ -399,6 +399,24 @@ qwerty</pre>
         t = input_(value="foo")
         self.assertEqual(str(t), '<input value="foo"/>')
 
+    def test_form_action_default_post(self):
+        t = form(action='/test')(
+            input_(type_='submit'),
+        )
+        self.assertEqual(str(t), '<form action="/test" method="POST"><input type="submit"/></form>')
+
+    def test_form_input_default_action(self):
+        t = form()(
+            input_(type_='submit', formaction='/test'),
+        )
+        self.assertEqual(str(t), '<form method="POST"><input formaction="/test" formmethod="POST" type="submit"/></form>')
+
+    def test_form_input_override_action(self):
+        t = form()(
+            input_(type_='submit', formaction='/test', formmethod='GET'),
+        )
+        self.assertEqual(str(t), '<form method="POST"><input formaction="/test" formmethod="GET" type="submit"/></form>')
+
 
 if __name__ == "__main__":
     unittest.main()
