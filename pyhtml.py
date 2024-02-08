@@ -200,7 +200,7 @@ if sys.version_info[0] >= 3:
 __version__ = '1.3.2'
 
 # The list will be extended by register_all function.
-__all__ = 'Tag Block Safe Var SelfClosingTag html script style form'.split()
+__all__ = 'Tag Block Safe Var SelfClosingTag html script style form input_'.split()
 
 tags = 'head body title div p h1 h2 h3 h4 h5 h6 u b i s a em strong span '\
        'font del_ ins ul ol li dd dt dl article section nav aside header '\
@@ -208,7 +208,7 @@ tags = 'head body title div p h1 h2 h3 h4 h5 h6 u b i s a em strong span '\
        'textarea label select option table thead tbody tfoot tr th td caption '\
        'blockquote cite q abbr acronym address'
 
-self_closing_tags = 'meta link br hr input_ img'
+self_closing_tags = 'meta link br hr img'
 
 whitespace_sensitive_tags = 'code samp pre var kbd dfn'
 
@@ -249,6 +249,7 @@ class Tag(six.with_metaclass(TagMeta, object)):  # type: ignore
     self_closing = False
     whitespace_sensitive = False
     default_attributes = {}  # type: Dict[str, str]
+    default_attributes_if_defined = {}  # type: Dict[str, List[str, str]]
     doctype = None  # type: str
 
     def __init__(self, *children, **attributes):
@@ -269,6 +270,12 @@ class Tag(six.with_metaclass(TagMeta, object)):  # type: ignore
 
         self.attributes = self.default_attributes.copy()
         self.attributes.update(attributes)
+
+        # Set default attributes based on existence of a tag.
+        for attribute, defaults in self.default_attributes_if_defined.items():
+            if attribute in self.attributes:
+                for attr, val in defaults.items():
+                    self.attributes.setdefault(attr, val)
 
     def __call__(self, *children, **options):
         if self.self_closing:
@@ -497,6 +504,11 @@ class style(Tag):
 
 class form(Tag):
     default_attributes = {'method': 'POST'}
+
+
+class input_(SelfClosingTag):
+    name = 'input'
+    default_attributes_if_defined = {'formaction': {'formmethod': 'POST'}}
 
 
 _M = sys.modules[__name__]
